@@ -4,5 +4,6 @@ out
 .env
 .env.local
 npm-debug.log*
+*.tsbuildinfo
 data/*.json
 !data/.gitkeep
