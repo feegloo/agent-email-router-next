@@ -2,6 +2,14 @@
 set -euo pipefail
 : "${PROJECT_ID:?Set PROJECT_ID to your Google Cloud project ID}"
 REGION=${REGION:-europe-west1}
+: "${SMTP_HOST:?Set SMTP_HOST from your email provider}"
+: "${SMTP_USER:?Set SMTP_USER}"
+: "${EMAIL_FROM:?Set EMAIL_FROM to an approved sender}"
+: "${EMAIL_ALLOWED_RECIPIENTS:?Set EMAIL_ALLOWED_RECIPIENTS to comma-separated demo recipient addresses}"
+SMTP_PASSWORD_SECRET=${SMTP_PASSWORD_SECRET:-email-router-smtp-password}
+: "${SMTP_PASSWORD_VERSION:?Set SMTP_PASSWORD_VERSION to a numeric Secret Manager version}"
+export SMTP_HOST SMTP_USER EMAIL_FROM EMAIL_ALLOWED_RECIPIENTS SMTP_PASSWORD_SECRET SMTP_PASSWORD_VERSION
+[[ "$SMTP_PASSWORD_VERSION" =~ ^[1-9][0-9]*$ ]] || { echo 'Invalid SMTP_PASSWORD_VERSION'; exit 1; }
 [[ "$PROJECT_ID" =~ ^[a-z][a-z0-9-]{4,28}[a-z0-9]$ ]] || { echo 'Invalid PROJECT_ID'; exit 1; }
 [[ "$REGION" =~ ^[a-z]+-[a-z]+[0-9]+$ ]] || { echo 'Invalid REGION'; exit 1; }
 cd "$(dirname "$0")/../.."
@@ -14,7 +22,7 @@ TAG=$(git rev-parse --short HEAD)
 TMP_DIR=$(mktemp -d)
 trap 'rm -rf "$TMP_DIR"' EXIT
 
-gcloud services enable run.googleapis.com artifactregistry.googleapis.com storage.googleapis.com iam.googleapis.com --project "$PROJECT_ID"
+gcloud services enable run.googleapis.com artifactregistry.googleapis.com storage.googleapis.com iam.googleapis.com secretmanager.googleapis.com --project "$PROJECT_ID"
 if ! gcloud artifacts repositories describe email-router --location "$REGION" --project "$PROJECT_ID" >/dev/null 2>&1; then
   gcloud artifacts repositories create email-router --repository-format docker --location "$REGION" --project "$PROJECT_ID"
 fi
@@ -25,6 +33,8 @@ if ! gcloud storage buckets describe "gs://$BUCKET" --project "$PROJECT_ID" >/de
   gcloud storage buckets create "gs://$BUCKET" --location "$REGION" --uniform-bucket-level-access --public-access-prevention --project "$PROJECT_ID"
 fi
 gcloud storage buckets add-iam-policy-binding "gs://$BUCKET" --member "serviceAccount:$ACCOUNT" --role roles/storage.objectUser --project "$PROJECT_ID" >/dev/null
+gcloud secrets versions describe "$SMTP_PASSWORD_VERSION" --secret "$SMTP_PASSWORD_SECRET" --project "$PROJECT_ID" >/dev/null
+gcloud secrets add-iam-policy-binding "$SMTP_PASSWORD_SECRET" --member "serviceAccount:$ACCOUNT" --role roles/secretmanager.secretAccessor --project "$PROJECT_ID" >/dev/null
 gcloud auth configure-docker "${REGION}-docker.pkg.dev" --quiet
 for item in app gateway ollama; do
   dockerfile=Dockerfile
