@@ -6,6 +6,8 @@ export const forwardingRouteSchema = z.object({
   rule: z.string().trim().min(1).max(2_000),
 });
 
+export const forwardingRoutesSchema = z.array(forwardingRouteSchema).min(1);
+
 export type ForwardingRoute = z.infer<typeof forwardingRouteSchema>;
 
 export const defaultRoutes: ForwardingRoute[] = [
