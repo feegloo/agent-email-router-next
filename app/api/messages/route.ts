@@ -1,3 +1,7 @@
+import { config } from "@/lib/config";
+import { sendEmail } from "@/lib/email";
+import { defaultRoutes } from "@/lib/routes";
+import { selectForwardingRoute } from "@/lib/routing-agent";
 import { messageInputSchema } from "@/lib/schemas/message";
 
 export async function POST(request: Request) {
@@ -10,5 +14,26 @@ export async function POST(request: Request) {
     );
   }
 
-  return Response.json({ message: "processing" }, { status: 202 });
+  try {
+    const route = await selectForwardingRoute(input.data.message, defaultRoutes);
+
+    await sendEmail({
+      to: route.email,
+      replyTo: config.defaultSenderEmail,
+      body: input.data.message,
+    });
+
+    return Response.json({
+      status: "forwarded",
+      routeId: route.id,
+      email: route.email,
+    });
+  } catch (error) {
+    console.error("Unable to route message", error);
+
+    return Response.json(
+      { error: "The message could not be routed." },
+      { status: 502 },
+    );
+  }
 }
