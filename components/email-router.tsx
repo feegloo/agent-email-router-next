@@ -185,7 +185,7 @@ export function EmailRouter() {
         <section className={`panel agent-panel ${status}`} aria-live="polite">
           <div className="agent-icon" aria-hidden="true"><span>●</span></div>
           <h2>AI Agent</h2>
-          <small style={{ fontSize: "13px", lineHeight: 1.4, color: "#91a5bd" }}>
+          <small style={{ fontSize: "13px", lineHeight: 1.4, color: "#c4b5fd" }}>
             LLM: Qwen 3.5 0.8B local (Ollama)
           </small>
           <p>
