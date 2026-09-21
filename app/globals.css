@@ -18,7 +18,7 @@ button, textarea, input { font: inherit; }
 
 .app-shell {
   min-height: 100vh;
-  padding: 42px;
+  padding: 60px 28px 20px;
   display: grid;
   place-items: center;
 }
@@ -26,7 +26,7 @@ button, textarea, input { font: inherit; }
 .flow-grid {
   width: min(1550px, 100%);
   display: grid;
-  grid-template-columns: minmax(300px, 1fr) 100px 240px minmax(390px, 1fr);
+  grid-template-columns: minmax(260px, 1fr) 64px 180px minmax(370px, 1fr);
   align-items: center;
 }
 
@@ -38,14 +38,14 @@ button, textarea, input { font: inherit; }
 }
 
 .message-panel {
-  padding: 30px;
+  padding: 20px;
   display: grid;
-  gap: 20px;
+  gap: 14px;
 }
 
 .message-panel h1 {
   margin: 0;
-  font-size: clamp(1.35rem, 2vw, 1.8rem);
+  font-size: 1.25rem;
 }
 
 textarea, input {
@@ -107,7 +107,7 @@ textarea:focus {
 }
 
 .agent-panel {
-  min-height: 240px;
+  min-height: 180px;
   padding: 28px 20px;
   display: grid;
   align-content: center;
@@ -149,23 +149,15 @@ textarea:focus {
 .agent-panel.error .status-dot { background: #ff6d83; box-shadow: none; }
 
 .branches {
-  min-height: 760px;
-  padding-left: 90px;
-  display: grid;
-  align-content: center;
-  gap: 22px;
+  height: max(560px, calc(100dvh - 80px));
   position: relative;
 }
 
-.branches::before {
-  content: "";
-  position: absolute;
-  left: 44px;
-  top: 12%;
-  bottom: 12%;
-  width: 3px;
-  background: #718198;
-  border-radius: 2px;
+.route-list {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-around;
 }
 
 .branches::after {
@@ -173,23 +165,39 @@ textarea:focus {
   position: absolute;
   left: 0;
   top: 50%;
-  width: 46px;
+  width: 41px;
   height: 3px;
   background: #718198;
 }
 
 .route-row {
+  position: relative;
+  flex: 1;
+  min-height: 140px;
+  padding-left: 40px;
   display: grid;
-  grid-template-columns: 46px 1fr;
+  grid-template-columns: 40px minmax(0, 1fr);
   align-items: center;
 }
 
+.route-row::before {
+  content: "";
+  position: absolute;
+  left: 40px;
+  top: 0;
+  bottom: 0;
+  width: 3px;
+  background: #718198;
+}
+.route-row:first-child::before { top: 50%; }
+.route-row:last-child::before { bottom: 50%; }
+
 .route-card {
-  min-height: 220px;
-  padding: 24px;
+  min-height: 130px;
+  padding: 22px 12px 10px;
   position: relative;
   display: grid;
-  gap: 10px;
+  gap: 5px;
 }
 
 .route-row.selected .route-card {
@@ -199,7 +207,8 @@ textarea:focus {
 
 .route-card input {
   width: 100%;
-  padding: 12px 44px 12px 14px;
+  padding: 7px 32px 7px 10px;
+  font-size: 13px;
   border: 1px solid #7185a1;
   border-radius: 10px;
   background: rgba(8, 20, 35, 0.72);
@@ -213,21 +222,23 @@ textarea:focus {
 }
 
 .rule-label {
-  font-size: 1rem;
+  font-size: 12px;
   font-weight: 750;
 }
 
 .route-card textarea {
-  min-height: 70px;
-  padding: 12px 14px;
-  font-size: 0.94rem;
+  height: 45px;
+  min-height: 45px;
+  padding: 5px 9px;
+  font-size: 12px;
+  resize: none;
 }
 
 .delete-route {
   position: absolute;
   z-index: 2;
-  top: 30px;
-  right: 34px;
+  top: 22px;
+  right: 14px;
   width: 34px;
   height: 34px;
   border: 0;
@@ -241,23 +252,28 @@ textarea:focus {
 .delete-route:disabled { opacity: 0.25; cursor: not-allowed; }
 
 .save-status {
-  justify-self: end;
+  position: absolute;
+  top: 5px;
+  right: 13px;
   color: #91a5bd;
-  font-size: 0.8rem;
+  font-size: 10px;
 }
 
 .save-status.saving { color: #f4c86a; }
 .save-status.error { color: #ff94a5; }
 
 .add-route {
-  margin-left: 46px;
-  padding: 18px;
+  position: absolute;
+  top: -38px;
+  left: 80px;
+  right: 0;
+  padding: 7px;
   border: 1px dashed #7185a1;
   border-radius: 14px;
   background: rgba(9, 22, 38, 0.5);
   color: #eaf2fc;
   font-weight: 750;
-  font-size: 1rem;
+  font-size: 13px;
   cursor: pointer;
 }
 
@@ -268,13 +284,14 @@ textarea:focus {
 
 .forwarded-badge {
   position: absolute;
-  top: 18px;
-  right: 68px;
-  padding: 7px 12px;
+  top: 4px;
+  left: 13px;
+  padding: 1px 6px;
+  right: auto;
   border-radius: 999px;
   background: #2ce3d8;
   color: #031414;
-  font-size: 0.78rem;
+  font-size: 10px;
   font-weight: 800;
 }
 
@@ -294,12 +311,13 @@ textarea:focus {
 
 @keyframes pulse { 50% { opacity: 0.35; } }
 
-@media (max-width: 1050px) {
+@media (max-width: 950px) {
   .app-shell { padding: 24px; }
   .flow-grid { grid-template-columns: 1fr; gap: 28px; }
-  .flow-arrow, .branches::before, .branches::after, .branch-connector { display: none; }
+  .flow-arrow, .route-row::before, .branches::after, .branch-connector { display: none; }
   .agent-panel { min-height: 180px; }
-  .branches { min-height: auto; padding: 0; gap: 20px; }
-  .route-row { display: block; }
-  .add-route { margin-left: 0; }
+  .branches { height: auto; padding: 0; }
+  .route-list { gap: 12px; }
+  .route-row { display: block; padding: 0; min-height: 0; }
+  .add-route { position: static; width: 100%; margin-bottom: 12px; }
 }

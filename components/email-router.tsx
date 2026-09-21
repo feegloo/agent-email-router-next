@@ -142,8 +142,8 @@ export function EmailRouter() {
             id="message"
             value={message}
             onChange={(event) => setMessage(event.target.value)}
-            placeholder="Describe what you need help with..."
-            rows={7}
+            placeholder="Example: I need 3 days of holiday from tomorrow"
+            rows={5}
           />
           <button type="submit" disabled={!message.trim() || status === "processing"}>
             {status === "processing" ? "Sending..." : "Send message"}
@@ -169,6 +169,10 @@ export function EmailRouter() {
         </section>
 
         <section className="branches" aria-label="Email forwarding routes">
+          <button className="add-route" type="button" onClick={() => void addRoute()}>
+            <span aria-hidden="true">＋</span> Add email
+          </button>
+          <div className="route-list">
           {routes.map((route) => {
             const selected = route.id === selectedRouteId;
             return (
@@ -216,9 +220,7 @@ export function EmailRouter() {
               </div>
             );
           })}
-          <button className="add-route" type="button" onClick={() => void addRoute()}>
-            <span aria-hidden="true">＋</span> Add email
-          </button>
+          </div>
         </section>
       </div>
     </main>
