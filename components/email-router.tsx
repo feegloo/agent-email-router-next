@@ -216,7 +216,7 @@ export function EmailRouter() {
               <div className={`route-row ${selected ? "selected" : ""}`} key={route.id}>
                 <div className="branch-connector" aria-hidden="true" />
                 <article className="panel route-card">
-                  {selected ? <span className="forwarded-badge">Forwarded</span> : null}
+                  {selected ? <span className="forwarded-badge">User message forwarded to email</span> : null}
                   <button
                     className="delete-route"
                     type="button"
