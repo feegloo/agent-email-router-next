@@ -171,7 +171,7 @@ export function EmailRouter() {
             }}
             value={message}
             onChange={(event) => setMessage(event.target.value)}
-            placeholder="Example: I need to take three days off starting tomorrow."
+            placeholder="Example: I need to take three days off starting tomorrow"
             rows={5}
           />
           <button type="submit" disabled={!message.trim() || status === "processing"}>
