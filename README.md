@@ -162,3 +162,7 @@ qwen3.5:0.8b
 ```
 
 This small model is fast enough for a local demonstration but can occasionally omit the required tool call or return an invalid argument. The server validates every tool call and automatically retries once before returning an error.
+
+## Cloud deployment
+
+See [Cloud Run deployment](deploy/cloud-run/README.md) for a private, scale-to-zero demo with a separate L4 GPU service, persistent routing rules, and MailHog email capture.
