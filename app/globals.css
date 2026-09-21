@@ -129,7 +129,7 @@ textarea:focus {
   height: 96px;
   text-align: left;
   color: #91a5bd;
-  font: 9px/16px ui-monospace, SFMono-Regular, Consolas, monospace;
+  font: 10px/16px ui-monospace, SFMono-Regular, Consolas, monospace;
 }
 .agent-logs > div {
   overflow: hidden;
