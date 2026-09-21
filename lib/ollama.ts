@@ -1,3 +1,5 @@
+import { ollamaHeaders } from "@/lib/cloud-auth";
+
 import { config } from "@/lib/config";
 
 export type OllamaTool = {
@@ -26,6 +28,7 @@ const baseUrl = config.ollamaBaseUrl.replace(/\/$/, "");
 export async function isOllamaReady(): Promise<boolean> {
   try {
     const response = await fetch(`${baseUrl}/api/tags`, {
+      headers: await ollamaHeaders(),
       cache: "no-store",
       signal: AbortSignal.timeout(2_000),
     });
@@ -42,7 +45,7 @@ export async function chatWithTools(input: {
 }): Promise<OllamaChatResponse> {
   const response = await fetch(`${baseUrl}/api/chat`, {
     method: "POST",
-    headers: { "Content-Type": "application/json" },
+    headers: { "Content-Type": "application/json", ...await ollamaHeaders() },
     body: JSON.stringify({
       model: config.ollamaModel,
       messages: input.messages,

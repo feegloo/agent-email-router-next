@@ -1,6 +1,8 @@
 import { mkdir, readFile, rename, writeFile } from "node:fs/promises";
 import path from "node:path";
 
+import { cloudRoutes } from "@/lib/cloud-routes";
+
 import { config } from "@/lib/config";
 import {
   defaultRoutes,
@@ -39,6 +41,7 @@ async function writeRoutesFile(routes: ForwardingRoute[]): Promise<void> {
 }
 
 export async function getRoutes(): Promise<ForwardingRoute[]> {
+  if (process.env.ROUTES_GCS_BUCKET) return cloudRoutes();
   await mutationQueue;
   return readRoutesFile();
 }
@@ -46,6 +49,7 @@ export async function getRoutes(): Promise<ForwardingRoute[]> {
 export function updateRoutes(
   mutate: (routes: ForwardingRoute[]) => ForwardingRoute[],
 ): Promise<ForwardingRoute[]> {
+  if (process.env.ROUTES_GCS_BUCKET) return cloudRoutes(mutate);
   const operation = mutationQueue.then(async () => {
     const currentRoutes = await readRoutesFile();
     const nextRoutes = mutate(structuredClone(currentRoutes));
