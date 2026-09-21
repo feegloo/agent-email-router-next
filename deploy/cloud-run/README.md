@@ -27,6 +27,30 @@ After deploying, the script enables public access only for `email-router` using 
 
 The public demo allows any visitor to send messages, edit shared routing rules and view raw logs during routing. There is no per-user isolation; visitor requests can incur GPU costs.
 
+## Access through an authenticated local proxy
+
+A proxy is useful for testing a private Cloud Run service in your browser. It also works with the public UI, but is not required for public access. Install the gcloud CLI and sign in with an account allowed to invoke the service (for private access, for example an account with `roles/run.invoker`).
+
+Run in a terminal on your computer:
+
+```bash
+gcloud auth login
+gcloud run services proxy email-router \
+  --port=3001 \
+  --region=europe-west1 \
+  --project=agent-email-router
+```
+
+Replace the project and region if you use a different deployment. Keep the terminal running and open [http://localhost:3001](http://localhost:3001). The application and Ollama still run in GCP; the local proxy forwards requests using your Google credentials. Docker does not need to run locally.
+
+Port 3001 avoids a conflict with the local demo on port 3000. If it is occupied, choose another port and open that port in your browser.
+
+Press **Ctrl+C** to stop the proxy. This only closes your local connection; it does not stop or delete the Cloud Run services.
+
+If you receive 403, check the active account with `gcloud auth list` and verify its permission to invoke the service. Use `email-router` for the UI. The private `email-router-gpu` service has no UI, and opening its URL directly without authentication returns 403.
+
+See [Google's authenticated proxy documentation](https://docs.cloud.google.com/run/docs/authenticating/developers#test).
+
 ## Verify after deployment
 
 1. Open the UI and edit a rule. Confirm the GPU has not started merely from opening the page.
