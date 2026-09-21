@@ -186,7 +186,7 @@ export function EmailRouter() {
           <div className="agent-icon" aria-hidden="true"><span>●</span></div>
           <h2>AI Agent</h2>
           <small style={{ fontSize: "12px", lineHeight: 1.4, color: "#91a5bd" }}>
-            LLM: Qwen 3.5 0.8B offline (Ollama)
+            LLM: Qwen 3.5 0.8B local (Ollama)
           </small>
           <p>
             <span className="status-dot" />
