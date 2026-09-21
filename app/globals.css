@@ -331,3 +331,39 @@ textarea:focus {
   .route-row { display: block; padding: 0; min-height: 0; }
   .add-route { position: static; width: 100%; margin-bottom: 12px; }
 }
+
+.project-footer {
+  position: fixed;
+  bottom: 12px;
+  left: 28px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  max-width: calc(100% - 56px);
+  color: #91a5bd;
+  font-size: 11px;
+  line-height: 1.5;
+}
+.project-footer a {
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  color: #91a5bd;
+  transition: color 150ms, background-color 150ms;
+}
+.project-footer a:hover, .project-footer a:focus-visible {
+  color: #000;
+  background: #eef5ff;
+}
+.project-footer a:focus-visible { outline: 2px solid #25e1d7; outline-offset: 3px; }
+@media (max-width: 1050px), (max-height: 650px) {
+  .project-footer {
+    position: static;
+    justify-self: start;
+    margin-top: 24px;
+    max-width: 100%;
+  }
+}
