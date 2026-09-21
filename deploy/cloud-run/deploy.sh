@@ -39,5 +39,7 @@ OLLAMA_URL=$(gcloud run services describe email-router-gpu --region "$REGION" --
 export OLLAMA_URL
 node deploy/cloud-run/manifests.mjs app > "$TMP_DIR/app.json"
 gcloud run services replace "$TMP_DIR/app.json" --region "$REGION" --project "$PROJECT_ID"
-echo "Deployed privately. Open through an authenticated proxy:"
-echo "gcloud run services proxy email-router --port=3000 --region=$REGION --project=$PROJECT_ID"
+gcloud run services update email-router --no-invoker-iam-check --region "$REGION" --project "$PROJECT_ID"
+APP_URL=$(gcloud run services describe email-router --region "$REGION" --project "$PROJECT_ID" --format 'value(status.url)')
+echo "Public UI: $APP_URL"
+echo "The GPU service remains private."
