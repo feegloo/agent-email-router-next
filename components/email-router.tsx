@@ -163,6 +163,12 @@ export function EmailRouter() {
           <label className="sr-only" htmlFor="message">Message to route</label>
           <textarea
             id="message"
+            onKeyDown={(event) => {
+              if (event.key === "Enter" && !event.shiftKey && !event.nativeEvent.isComposing) {
+                event.preventDefault();
+                event.currentTarget.form?.requestSubmit();
+              }
+            }}
             value={message}
             onChange={(event) => setMessage(event.target.value)}
             placeholder="Example: I need 3 days of holiday from tomorrow"
