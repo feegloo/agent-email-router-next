@@ -5,7 +5,7 @@ export function lastLogLines(text: string, skipPartial = false): string[] {
   if (skipPartial) lines.shift();
   // Only publish complete lines; the writer may be midway through a record.
   lines.pop();
-  return lines.map((line) => line.replace(/\r$/, "")).filter(Boolean).slice(-2);
+  return lines.map((line) => line.replace(/\r$/, "")).filter(Boolean).slice(-3);
 }
 
 export async function readLogTail(path: string): Promise<string[]> {

@@ -8,11 +8,11 @@ This repository is a Node.js and Next.js implementation based on the original Py
 
 ### Live container logs (local only)
 
-The two small lines below the agent status show actual Ollama stdout/stderr,
+The three small lines below the agent status show actual Ollama stdout/stderr,
 not model response tokens. The container entrypoint duplicates output to a shared
-log file; Next.js mounts it read-only and sends the latest two complete lines
+log file; Next.js mounts it read-only and sends the latest three complete lines
 over `/api/agent/logs` (SSE), checking once per second. Bursts are collapsed
-to the latest two lines. Hover a line to read its full text.
+to the latest three lines. Hover a line to read its full text.
 
 Run `docker compose up --build -d` after updating, including the `docker/`
 folder. No Docker socket is mounted. Logs reset when the Ollama container starts;

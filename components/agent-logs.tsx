@@ -9,7 +9,7 @@ export function AgentLogs() {
     const source = new EventSource("/api/agent/logs");
     source.addEventListener("logs", (event: MessageEvent<string>) => {
       const data = JSON.parse(event.data) as { lines: string[] };
-      setLines(data.lines.slice(-2));
+      setLines(data.lines.slice(-3));
       setConnection("");
     });
     source.addEventListener("status", (event: MessageEvent<string>) => {
@@ -25,6 +25,7 @@ export function AgentLogs() {
         {connection || lines[0] || "Waiting for container output..."}
       </div>
       <div title={lines[1] || ""}>{lines[1] || "\u00a0"}</div>
+      <div title={lines[2] || ""}>{lines[2] || "\u00a0"}</div>
     </div>
   );
 }
