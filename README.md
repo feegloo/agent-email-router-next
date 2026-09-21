@@ -1,5 +1,7 @@
 # agent-email-router-next
 
+**[Live demo](https://email-router-192983570115.europe-west1.run.app/)**
+
 An interactive Next.js visualizer for an AI agent that forwards user messages to the right department email address.
 
 This repository is a Node.js and Next.js implementation based on my original Python implementation with CLI: [feegloo/agent-email-router](https://github.com/feegloo/agent-email-router).
