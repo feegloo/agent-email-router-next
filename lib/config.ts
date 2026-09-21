@@ -8,7 +8,13 @@ function readPort(value: string | undefined, fallback: number): number {
   return port;
 }
 
+const ollamaTimeoutMs = Number(process.env.OLLAMA_TIMEOUT_MS ?? 600_000);
+if (!Number.isSafeInteger(ollamaTimeoutMs) || ollamaTimeoutMs < 1) {
+  throw new Error("OLLAMA_TIMEOUT_MS must be a positive integer.");
+}
+
 export const config = {
+  ollamaTimeoutMs,
   ollamaBaseUrl: process.env.OLLAMA_BASE_URL ?? "http://localhost:11434",
   ollamaModel: process.env.OLLAMA_MODEL ?? "qwen3.5:0.8b",
   smtpHost: process.env.SMTP_HOST ?? "localhost",

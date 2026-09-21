@@ -30,6 +30,12 @@ export async function POST(request: Request) {
     });
   } catch (error) {
     console.error("Unable to route message", error);
+    if (error instanceof Error && error.name === "TimeoutError") {
+      return Response.json(
+        { error: "Ollama took too long to respond. No email was sent. Try again with the model loaded, or increase OLLAMA_TIMEOUT_MS." },
+        { status: 504 },
+      );
+    }
 
     return Response.json(
       { error: "The message could not be routed." },

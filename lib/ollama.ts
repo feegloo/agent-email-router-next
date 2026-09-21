@@ -52,7 +52,7 @@ export async function chatWithTools(input: {
       keep_alive: "10m",
       options: { temperature: 0 },
     }),
-    signal: AbortSignal.timeout(120_000),
+    signal: AbortSignal.timeout(config.ollamaTimeoutMs),
   });
 
   if (!response.ok) {
