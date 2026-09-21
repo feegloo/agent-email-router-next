@@ -5,6 +5,7 @@ services:
       - "3000:3000"
     environment:
       OLLAMA_BASE_URL: http://ollama:11434
+      OLLAMA_LOG_PATH: /var/log/ollama/server.log
       OLLAMA_TIMEOUT_MS: ${OLLAMA_TIMEOUT_MS:-600000}
       OLLAMA_MODEL: qwen3.5:0.8b
       SMTP_HOST: mailhog
@@ -14,6 +15,7 @@ services:
       ROUTES_FILE_PATH: /app/data/routes.json
     volumes:
       - routes_data:/app/data
+      - ollama_logs:/var/log/ollama:ro
     depends_on:
       mailhog:
         condition: service_started
@@ -34,10 +36,13 @@ services:
 
   ollama:
     image: ollama/ollama:0.32.2
+    entrypoint: ["/bin/sh", "/opt/ollama-entrypoint.sh"]
     ports:
       - "11434:11434"
     volumes:
       - ollama_data:/root/.ollama
+      - ollama_logs:/var/log/ollama
+      - ./docker/ollama-entrypoint.sh:/opt/ollama-entrypoint.sh:ro
 
   ollama-model-init:
     image: ollama/ollama:0.32.2
@@ -71,4 +76,5 @@ services:
 volumes:
   routes_data:
   ollama_data:
+  ollama_logs:
   mailhog:
