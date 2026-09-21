@@ -26,7 +26,7 @@ button, textarea, input { font: inherit; }
 .flow-grid {
   width: min(1550px, 100%);
   display: grid;
-  grid-template-columns: minmax(230px, 0.7fr) 64px minmax(390px, 0.94fr) minmax(280px, 0.7fr);
+  grid-template-columns: minmax(184px, 0.56fr) 64px minmax(390px, 1.08fr) minmax(280px, 0.7fr);
   align-items: center;
 }
 
@@ -45,7 +45,7 @@ button, textarea, input { font: inherit; }
 
 .message-panel h1 {
   margin: 0;
-  font-size: 1.125rem;
+  font-size: 0.8125rem;
 }
 
 textarea, input {
@@ -71,7 +71,7 @@ textarea:focus {
 .message-panel button {
   border: 0;
   border-radius: 12px;
-  padding: 15px 20px;
+  padding: 10px 20px;
   background: linear-gradient(135deg, #25ddd3, #31eee2);
   color: #031414;
   font-weight: 800;
@@ -122,10 +122,10 @@ textarea:focus {
 .agent-logs {
   width: 100%;
   min-width: 0;
-  height: 80px;
+  height: 96px;
   text-align: left;
   color: #91a5bd;
-  font: 10px/16px ui-monospace, SFMono-Regular, Consolas, monospace;
+  font: 9px/16px ui-monospace, SFMono-Regular, Consolas, monospace;
 }
 .agent-logs > div {
   overflow: hidden;
