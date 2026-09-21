@@ -1,8 +1,10 @@
-# agent-email-router-node
+# agent-email-router-next
 
 An interactive Next.js visualizer for an AI agent that forwards user messages to the right department email address.
 
 This repository is a Node.js and Next.js implementation based on my original Python implementation with CLI: [feegloo/agent-email-router](https://github.com/feegloo/agent-email-router).
+
+https://github.com/user-attachments/assets/69900e98-ba3f-4342-a3e6-d48a89b08e3e
 
 ## What it does
 
@@ -14,8 +16,6 @@ This repository is a Node.js and Next.js implementation based on my original Pyt
 6. The UI highlights the path selected by the agent.
 
 The model never provides the destination email address directly. It can only select an ID from the current list of routes, and the server resolves that ID to a saved email address.
-
-https://github.com/user-attachments/assets/69900e98-ba3f-4342-a3e6-d48a89b08e3e
 
 ## Forwarding routes
 
