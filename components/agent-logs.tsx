@@ -11,7 +11,7 @@ export function AgentLogs() {
     const timer = setInterval(() => {
       const line = pending.shift();
       if (line === undefined) return;
-      setLines((current) => [...current, line].slice(-5));
+      setLines((current) => [...current, line].slice(-6));
       setConnection("");
     }, 100);
     source.addEventListener("log", (event: MessageEvent<string>) => {
@@ -34,6 +34,7 @@ export function AgentLogs() {
       <div title={lines[2] || ""}>{lines[2] || "\u00a0"}</div>
       <div title={lines[3] || ""}>{lines[3] || "\u00a0"}</div>
       <div title={lines[4] || ""}>{lines[4] || "\u00a0"}</div>
+      <div title={lines[5] || ""}>{lines[5] || "\u00a0"}</div>
     </div>
   );
 }
