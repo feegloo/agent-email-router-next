@@ -8,6 +8,11 @@ export const forwardingRouteSchema = z.object({
 
 export const forwardingRoutesSchema = z.array(forwardingRouteSchema).min(1);
 
+export const forwardingRouteInputSchema = forwardingRouteSchema.omit({ id: true });
+export const forwardingRouteUpdateSchema = forwardingRouteInputSchema
+  .partial()
+  .refine((value) => Object.keys(value).length > 0, "At least one field is required.");
+
 export type ForwardingRoute = z.infer<typeof forwardingRouteSchema>;
 
 export const defaultRoutes: ForwardingRoute[] = [

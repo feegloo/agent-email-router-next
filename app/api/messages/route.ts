@@ -1,6 +1,6 @@
 import { config } from "@/lib/config";
 import { sendEmail } from "@/lib/email";
-import { defaultRoutes } from "@/lib/routes";
+import { getRoutes } from "@/lib/route-store";
 import { selectForwardingRoute } from "@/lib/routing-agent";
 import { messageInputSchema } from "@/lib/schemas/message";
 
@@ -15,7 +15,7 @@ export async function POST(request: Request) {
   }
 
   try {
-    const route = await selectForwardingRoute(input.data.message, defaultRoutes);
+    const route = await selectForwardingRoute(input.data.message, await getRoutes());
 
     await sendEmail({
       to: route.email,
