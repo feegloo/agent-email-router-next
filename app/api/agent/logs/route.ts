@@ -1,9 +1,22 @@
+import { ollamaHeaders } from "@/lib/cloud-auth";
 import { createLogReader } from "@/lib/ollama-logs";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
-export function GET(request: Request) {
+export async function GET(request: Request) {
+  if (process.env.OLLAMA_CLOUD_RUN_AUDIENCE) {
+    try {
+      const response = await fetch(`${process.env.OLLAMA_BASE_URL}/logs`, {
+        headers: await ollamaHeaders(), signal: request.signal, cache: "no-store",
+      });
+      return new Response(response.body, { status: response.status, headers: {
+        "Content-Type": "text/event-stream", "Cache-Control": "no-cache, no-transform",
+      } });
+    } catch {
+      return Response.json({ error: "Container logs unavailable" }, { status: 503 });
+    }
+  }
   const path = process.env.OLLAMA_LOG_PATH;
   if (!path) {
     return Response.json({ error: "Container logs are available in Docker Compose." }, { status: 503 });

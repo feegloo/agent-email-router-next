@@ -198,7 +198,7 @@ export function EmailRouter() {
                   ? "Routing failed"
                   : "Ready to route email"}
           </p>
-          <AgentLogs />
+          <AgentLogs active={status === "processing"} />
         </section>
 
         <section className="branches" aria-label="Email forwarding routes">

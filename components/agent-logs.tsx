@@ -2,10 +2,11 @@
 
 import { useEffect, useState } from "react";
 
-export function AgentLogs() {
+export function AgentLogs({ active }: { active: boolean }) {
   const [lines, setLines] = useState<string[]>([]);
   const [connection, setConnection] = useState("Connecting to container logs...");
   useEffect(() => {
+    if (!active) return;
     const source = new EventSource("/api/agent/logs");
     const pending: string[] = [];
     const timer = setInterval(() => {
@@ -24,11 +25,11 @@ export function AgentLogs() {
     });
     source.onerror = () => setConnection("Logs disconnected. Reconnecting...");
     return () => { source.close(); clearInterval(timer); };
-  }, []);
+  }, [active]);
   return (
     <div className="agent-logs" aria-label="Raw Ollama container logs" aria-live="off">
-      <div title={connection || lines[0] || "Waiting for container output..."}>
-        {connection || lines[0] || "Waiting for container output..."}
+      <div title={(active ? connection : "") || lines[0] || "Logs appear while routing a message"}>
+        {(active ? connection : "") || lines[0] || "Logs appear while routing a message"}
       </div>
       <div title={lines[1] || ""}>{lines[1] || "\u00a0"}</div>
       <div title={lines[2] || ""}>{lines[2] || "\u00a0"}</div>
