@@ -3,6 +3,7 @@
 import { FormEvent, useEffect, useState } from "react";
 
 import type { ForwardingRoute } from "@/lib/routes";
+import { AgentLogs } from "@/components/agent-logs";
 
 type FlowStatus = "idle" | "processing" | "forwarded" | "error";
 type SaveStatus = "idle" | "saving" | "saved" | "error";
@@ -166,6 +167,7 @@ export function EmailRouter() {
                   ? "Routing failed"
                   : "Ready"}
           </p>
+          <AgentLogs />
         </section>
 
         <section className="branches" aria-label="Email forwarding routes">

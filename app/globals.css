@@ -118,6 +118,21 @@ textarea:focus {
 
 .agent-panel h2, .agent-panel p, .route-card h3, .route-card p { margin: 0; }
 .agent-panel p { color: #c8d4e3; }
+.agent-panel { min-width: 0; }
+.agent-logs {
+  width: 100%;
+  min-width: 0;
+  height: 28px;
+  text-align: left;
+  color: #91a5bd;
+  font: 9px/14px ui-monospace, SFMono-Regular, Consolas, monospace;
+}
+.agent-logs > div {
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  height: 14px;
+}
 
 .agent-icon {
   width: 74px;
