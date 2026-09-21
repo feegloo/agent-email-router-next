@@ -1,4 +1,4 @@
-import { readLogTail } from "@/lib/ollama-logs";
+import { createLogReader } from "@/lib/ollama-logs";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -15,7 +15,7 @@ export function GET(request: Request) {
     start(controller) {
       let closed = false;
       let timer: ReturnType<typeof setTimeout>;
-      let previous = "";
+      const readLines = createLogReader(path!);
       const send = (event: string, data: unknown) =>
         controller.enqueue(encoder.encode(`event: ${event}\ndata: ${JSON.stringify(data)}\n\n`));
       stop = () => {
@@ -30,12 +30,10 @@ export function GET(request: Request) {
       send("status", { message: "Connected to Ollama container logs" });
       async function poll() {
         try {
-          const lines = await readLogTail(path!);
+          const lines = await readLines();
           if (closed) return;
-          const snapshot = JSON.stringify(lines);
-          if (snapshot !== previous) {
-            send("logs", { lines });
-            previous = snapshot;
+          if (lines.length) {
+            for (const line of lines) send("log", { line });
           } else {
             controller.enqueue(encoder.encode(": keepalive\n\n"));
           }
@@ -43,7 +41,7 @@ export function GET(request: Request) {
           if (closed) return;
           send("status", { message: "Waiting for Ollama container logs..." });
         }
-        if (!closed) timer = setTimeout(poll, 1000);
+        if (!closed) timer = setTimeout(poll, 250);
       }
       void poll();
     },

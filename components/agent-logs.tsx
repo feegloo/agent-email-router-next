@@ -7,17 +7,23 @@ export function AgentLogs() {
   const [connection, setConnection] = useState("Connecting to container logs...");
   useEffect(() => {
     const source = new EventSource("/api/agent/logs");
-    source.addEventListener("logs", (event: MessageEvent<string>) => {
-      const data = JSON.parse(event.data) as { lines: string[] };
-      setLines(data.lines.slice(-3));
+    const pending: string[] = [];
+    const timer = setInterval(() => {
+      const line = pending.shift();
+      if (line === undefined) return;
+      setLines((current) => [...current, line].slice(-3));
       setConnection("");
+    }, 100);
+    source.addEventListener("log", (event: MessageEvent<string>) => {
+      const data = JSON.parse(event.data) as { line: string };
+      pending.push(data.line);
     });
     source.addEventListener("status", (event: MessageEvent<string>) => {
       const data = JSON.parse(event.data) as { message: string };
       setConnection(data.message);
     });
     source.onerror = () => setConnection("Logs disconnected. Reconnecting...");
-    return () => source.close();
+    return () => { source.close(); clearInterval(timer); };
   }, []);
   return (
     <div className="agent-logs" aria-label="Raw Ollama container logs" aria-live="off">
