@@ -1,4 +1,11 @@
 services:
+  ollama:
+    image: ollama/ollama:0.32.2
+    ports:
+      - "11434:11434"
+    volumes:
+      - ollama_data:/root/.ollama
+
   mailhog:
     image: mailhog/mailhog:v1.0.1
     ports:
@@ -11,4 +18,5 @@ services:
       MH_MAILDIR_PATH: /home/mailhog
 
 volumes:
+  ollama_data:
   mailhog:
