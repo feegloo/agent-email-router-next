@@ -193,7 +193,7 @@ export function EmailRouter() {
                 ? `Processing complete (${duration} ${duration === 1 ? "second" : "seconds"})`
                 : status === "error"
                   ? "Routing failed"
-                  : "Ready"}
+                  : "Ready to route email"}
           </p>
           <AgentLogs />
         </section>
