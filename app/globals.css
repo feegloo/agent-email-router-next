@@ -48,7 +48,7 @@ button, textarea, input { font: inherit; }
   font-size: clamp(1.35rem, 2vw, 1.8rem);
 }
 
-textarea, .readonly-field {
+textarea, input {
   width: 100%;
   border: 1px solid #7185a1;
   border-radius: 12px;
@@ -149,10 +149,11 @@ textarea:focus {
 .agent-panel.error .status-dot { background: #ff6d83; box-shadow: none; }
 
 .branches {
-  min-height: 670px;
+  min-height: 760px;
   padding-left: 90px;
   display: grid;
-  align-content: space-evenly;
+  align-content: center;
+  gap: 22px;
   position: relative;
 }
 
@@ -160,8 +161,8 @@ textarea:focus {
   content: "";
   position: absolute;
   left: 44px;
-  top: 16.66%;
-  bottom: 16.66%;
+  top: 12%;
+  bottom: 12%;
   width: 3px;
   background: #718198;
   border-radius: 2px;
@@ -184,11 +185,11 @@ textarea:focus {
 }
 
 .route-card {
-  min-height: 165px;
+  min-height: 220px;
   padding: 24px;
   position: relative;
   display: grid;
-  gap: 12px;
+  gap: 10px;
 }
 
 .route-row.selected .route-card {
@@ -196,20 +197,79 @@ textarea:focus {
   box-shadow: 0 0 22px rgba(37, 225, 215, 0.25);
 }
 
-.route-card h3 { font-size: 1.05rem; }
-.route-card p { color: #acbdd2; line-height: 1.4; }
+.route-card input {
+  width: 100%;
+  padding: 12px 44px 12px 14px;
+  border: 1px solid #7185a1;
+  border-radius: 10px;
+  background: rgba(8, 20, 35, 0.72);
+  color: #f5f8fc;
+  outline: none;
+}
 
-.readonly-field {
+.route-card input:focus {
+  border-color: #22ddd4;
+  box-shadow: 0 0 0 3px rgba(34, 221, 212, 0.12);
+}
+
+.rule-label {
+  font-size: 1rem;
+  font-weight: 750;
+}
+
+.route-card textarea {
+  min-height: 70px;
   padding: 12px 14px;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+  font-size: 0.94rem;
+}
+
+.delete-route {
+  position: absolute;
+  z-index: 2;
+  top: 30px;
+  right: 34px;
+  width: 34px;
+  height: 34px;
+  border: 0;
+  background: transparent;
+  color: #dbe7f5;
+  font-size: 1.8rem;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.delete-route:disabled { opacity: 0.25; cursor: not-allowed; }
+
+.save-status {
+  justify-self: end;
+  color: #91a5bd;
+  font-size: 0.8rem;
+}
+
+.save-status.saving { color: #f4c86a; }
+.save-status.error { color: #ff94a5; }
+
+.add-route {
+  margin-left: 46px;
+  padding: 18px;
+  border: 1px dashed #7185a1;
+  border-radius: 14px;
+  background: rgba(9, 22, 38, 0.5);
+  color: #eaf2fc;
+  font-weight: 750;
+  font-size: 1rem;
+  cursor: pointer;
+}
+
+.add-route:hover {
+  border-color: #25e1d7;
+  color: #25e1d7;
 }
 
 .forwarded-badge {
   position: absolute;
   top: 18px;
-  right: 18px;
+  right: 68px;
   padding: 7px 12px;
   border-radius: 999px;
   background: #2ce3d8;
@@ -241,4 +301,5 @@ textarea:focus {
   .agent-panel { min-height: 180px; }
   .branches { min-height: auto; padding: 0; gap: 20px; }
   .route-row { display: block; }
+  .add-route { margin-left: 0; }
 }

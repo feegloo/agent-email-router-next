@@ -5,6 +5,7 @@ import { FormEvent, useEffect, useState } from "react";
 import type { ForwardingRoute } from "@/lib/routes";
 
 type FlowStatus = "idle" | "processing" | "forwarded" | "error";
+type SaveStatus = "idle" | "saving" | "saved" | "error";
 
 export function EmailRouter() {
   const [routes, setRoutes] = useState<ForwardingRoute[]>([]);
@@ -12,6 +13,7 @@ export function EmailRouter() {
   const [status, setStatus] = useState<FlowStatus>("idle");
   const [selectedRouteId, setSelectedRouteId] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [saveStatus, setSaveStatus] = useState<Record<string, SaveStatus>>({});
 
   useEffect(() => {
     void fetch("/api/routes")
@@ -48,6 +50,83 @@ export function EmailRouter() {
     } catch (reason) {
       setStatus("error");
       setError(reason instanceof Error ? reason.message : "The message could not be routed.");
+    }
+  }
+
+  function changeRoute(id: string, change: Partial<ForwardingRoute>) {
+    setRoutes((currentRoutes) =>
+      currentRoutes.map((route) => (route.id === id ? { ...route, ...change } : route)),
+    );
+    setSaveStatus((current) => ({ ...current, [id]: "idle" }));
+  }
+
+  async function saveRoute(route: ForwardingRoute) {
+    setSaveStatus((current) => ({ ...current, [route.id]: "saving" }));
+
+    try {
+      const response = await fetch(`/api/routes/${route.id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email: route.email, rule: route.rule }),
+      });
+      const data = (await response.json()) as { route?: ForwardingRoute; error?: string };
+
+      if (!response.ok || !data.route) {
+        throw new Error(data.error ?? "Unable to save forwarding route.");
+      }
+
+      setRoutes((currentRoutes) =>
+        currentRoutes.map((currentRoute) =>
+          currentRoute.id === route.id ? data.route! : currentRoute,
+        ),
+      );
+      setSaveStatus((current) => ({ ...current, [route.id]: "saved" }));
+    } catch (reason) {
+      setSaveStatus((current) => ({ ...current, [route.id]: "error" }));
+      setError(reason instanceof Error ? reason.message : "Unable to save forwarding route.");
+    }
+  }
+
+  async function addRoute() {
+    setError(null);
+
+    try {
+      const response = await fetch("/api/routes", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          email: "new-department@example.com",
+          rule: "Describe the messages that should be forwarded to this email.",
+        }),
+      });
+      const data = (await response.json()) as { route?: ForwardingRoute; error?: string };
+
+      if (!response.ok || !data.route) {
+        throw new Error(data.error ?? "Unable to add forwarding route.");
+      }
+
+      setRoutes((currentRoutes) => [...currentRoutes, data.route!]);
+      setSaveStatus((current) => ({ ...current, [data.route!.id]: "saved" }));
+    } catch (reason) {
+      setError(reason instanceof Error ? reason.message : "Unable to add forwarding route.");
+    }
+  }
+
+  async function deleteRoute(id: string) {
+    setError(null);
+
+    try {
+      const response = await fetch(`/api/routes/${id}`, { method: "DELETE" });
+
+      if (!response.ok) {
+        const data = (await response.json()) as { error?: string };
+        throw new Error(data.error ?? "Unable to delete forwarding route.");
+      }
+
+      setRoutes((currentRoutes) => currentRoutes.filter((route) => route.id !== id));
+      if (selectedRouteId === id) setSelectedRouteId(null);
+    } catch (reason) {
+      setError(reason instanceof Error ? reason.message : "Unable to delete forwarding route.");
     }
   }
 
@@ -97,13 +176,49 @@ export function EmailRouter() {
                 <div className="branch-connector" aria-hidden="true" />
                 <article className="panel route-card">
                   {selected ? <span className="forwarded-badge">Forwarded</span> : null}
-                  <h3>Email forwarding rules</h3>
-                  <div className="readonly-field">{route.email}</div>
-                  <p>{route.rule}</p>
+                  <button
+                    className="delete-route"
+                    type="button"
+                    onClick={() => void deleteRoute(route.id)}
+                    aria-label={`Delete route ${route.email}`}
+                    disabled={routes.length === 1}
+                  >
+                    ×
+                  </button>
+                  <label className="sr-only" htmlFor={`email-${route.id}`}>
+                    Forwarding email
+                  </label>
+                  <input
+                    id={`email-${route.id}`}
+                    type="email"
+                    value={route.email}
+                    onChange={(event) => changeRoute(route.id, { email: event.target.value })}
+                    onBlur={() => void saveRoute(route)}
+                  />
+                  <label className="rule-label" htmlFor={`rule-${route.id}`}>
+                    Email forwarding rules
+                  </label>
+                  <textarea
+                    id={`rule-${route.id}`}
+                    rows={2}
+                    value={route.rule}
+                    onChange={(event) => changeRoute(route.id, { rule: event.target.value })}
+                    onBlur={() => void saveRoute(route)}
+                  />
+                  <span className={`save-status ${saveStatus[route.id] ?? "idle"}`}>
+                    {saveStatus[route.id] === "saving"
+                      ? "Saving..."
+                      : saveStatus[route.id] === "error"
+                        ? "Not saved"
+                        : "Saved"}
+                  </span>
                 </article>
               </div>
             );
           })}
+          <button className="add-route" type="button" onClick={() => void addRoute()}>
+            <span aria-hidden="true">＋</span> Add email
+          </button>
         </section>
       </div>
     </main>
