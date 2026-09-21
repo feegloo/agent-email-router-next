@@ -26,7 +26,7 @@ button, textarea, input { font: inherit; }
 .flow-grid {
   width: min(1550px, 100%);
   display: grid;
-  grid-template-columns: minmax(260px, 1fr) 64px 180px minmax(370px, 1fr);
+  grid-template-columns: minmax(230px, 0.7fr) 64px minmax(300px, 0.64fr) minmax(370px, 1fr);
   align-items: center;
 }
 
@@ -122,16 +122,16 @@ textarea:focus {
 .agent-logs {
   width: 100%;
   min-width: 0;
-  height: 28px;
+  height: 48px;
   text-align: left;
   color: #91a5bd;
-  font: 9px/14px ui-monospace, SFMono-Regular, Consolas, monospace;
+  font: 11px/16px ui-monospace, SFMono-Regular, Consolas, monospace;
 }
 .agent-logs > div {
   overflow: hidden;
   white-space: nowrap;
   text-overflow: ellipsis;
-  height: 14px;
+  height: 16px;
 }
 
 .agent-icon {
@@ -175,15 +175,18 @@ textarea:focus {
   justify-content: space-around;
 }
 
-.branches::after {
-  content: "";
+.branch-paths {
   position: absolute;
   left: 0;
-  top: 50%;
-  width: 41px;
-  height: 3px;
-  background: #718198;
+  top: 0;
+  width: 80px;
+  height: 100%;
+  overflow: visible;
+  pointer-events: none;
 }
+.branch-paths path { fill: none; stroke: #718198; stroke-width: 3px; }
+.branch-paths path.selected { stroke: #25e1d7; }
+.branch-connector { background: transparent !important; box-shadow: none !important; }
 
 .route-row {
   position: relative;
@@ -195,17 +198,6 @@ textarea:focus {
   align-items: center;
 }
 
-.route-row::before {
-  content: "";
-  position: absolute;
-  left: 40px;
-  top: 0;
-  bottom: 0;
-  width: 3px;
-  background: #718198;
-}
-.route-row:first-child::before { top: 50%; }
-.route-row:last-child::before { bottom: 50%; }
 
 .route-card {
   min-height: 130px;
@@ -326,10 +318,10 @@ textarea:focus {
 
 @keyframes pulse { 50% { opacity: 0.35; } }
 
-@media (max-width: 950px) {
+@media (max-width: 1050px) {
   .app-shell { padding: 24px; }
   .flow-grid { grid-template-columns: 1fr; gap: 28px; }
-  .flow-arrow, .route-row::before, .branches::after, .branch-connector { display: none; }
+  .flow-arrow, .branch-paths, .branch-connector { display: none; }
   .agent-panel { min-height: 180px; }
   .branches { height: auto; padding: 0; }
   .route-list { gap: 12px; }

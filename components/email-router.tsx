@@ -1,6 +1,6 @@
 "use client";
 
-import { FormEvent, useEffect, useState } from "react";
+import { FormEvent, useEffect, useRef, useState } from "react";
 
 import type { ForwardingRoute } from "@/lib/routes";
 import { AgentLogs } from "@/components/agent-logs";
@@ -15,6 +15,13 @@ export function EmailRouter() {
   const [selectedRouteId, setSelectedRouteId] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [saveStatus, setSaveStatus] = useState<Record<string, SaveStatus>>({});
+  const [duration, setDuration] = useState(0);
+  const savedRoutes = useRef<Record<string, string>>({});
+  const saveTimers = useRef<Record<string, ReturnType<typeof setTimeout>>>({});
+
+  useEffect(() => () => {
+    Object.values(saveTimers.current).forEach(clearTimeout);
+  }, []);
 
   useEffect(() => {
     void fetch("/api/routes")
@@ -22,7 +29,12 @@ export function EmailRouter() {
         if (!response.ok) throw new Error("Unable to load forwarding routes.");
         return response.json() as Promise<{ routes: ForwardingRoute[] }>;
       })
-      .then((data) => setRoutes(data.routes))
+      .then((data) => {
+        data.routes.forEach((route) => {
+          savedRoutes.current[route.id] = JSON.stringify([route.email, route.rule]);
+        });
+        setRoutes(data.routes);
+      })
       .catch((reason: unknown) =>
         setError(reason instanceof Error ? reason.message : "Unable to load forwarding routes."),
       );
@@ -35,6 +47,7 @@ export function EmailRouter() {
     setStatus("processing");
     setSelectedRouteId(null);
     setError(null);
+    const started = performance.now();
 
     try {
       const response = await fetch("/api/messages", {
@@ -47,6 +60,7 @@ export function EmailRouter() {
         throw new Error(data.error ?? "The message could not be routed.");
       }
       setSelectedRouteId(data.routeId);
+      setDuration(Math.round((performance.now() - started) / 1000));
       setStatus("forwarded");
     } catch (reason) {
       setStatus("error");
@@ -55,6 +69,7 @@ export function EmailRouter() {
   }
 
   function changeRoute(id: string, change: Partial<ForwardingRoute>) {
+    clearTimeout(saveTimers.current[id]);
     setRoutes((currentRoutes) =>
       currentRoutes.map((route) => (route.id === id ? { ...route, ...change } : route)),
     );
@@ -62,6 +77,9 @@ export function EmailRouter() {
   }
 
   async function saveRoute(route: ForwardingRoute) {
+    const snapshot = JSON.stringify([route.email, route.rule]);
+    if (savedRoutes.current[route.id] === snapshot) return;
+    clearTimeout(saveTimers.current[route.id]);
     setSaveStatus((current) => ({ ...current, [route.id]: "saving" }));
 
     try {
@@ -82,6 +100,10 @@ export function EmailRouter() {
         ),
       );
       setSaveStatus((current) => ({ ...current, [route.id]: "saved" }));
+      savedRoutes.current[route.id] = snapshot;
+      saveTimers.current[route.id] = setTimeout(() => {
+        setSaveStatus((current) => ({ ...current, [route.id]: "idle" }));
+      }, 3000);
     } catch (reason) {
       setSaveStatus((current) => ({ ...current, [route.id]: "error" }));
       setError(reason instanceof Error ? reason.message : "Unable to save forwarding route.");
@@ -107,7 +129,7 @@ export function EmailRouter() {
       }
 
       setRoutes((currentRoutes) => [...currentRoutes, data.route!]);
-      setSaveStatus((current) => ({ ...current, [data.route!.id]: "saved" }));
+      savedRoutes.current[data.route.id] = JSON.stringify([data.route.email, data.route.rule]);
     } catch (reason) {
       setError(reason instanceof Error ? reason.message : "Unable to add forwarding route.");
     }
@@ -162,7 +184,7 @@ export function EmailRouter() {
             {status === "processing"
               ? "Processing..."
               : status === "forwarded"
-                ? "Processing complete"
+                ? `Processing complete (${duration} ${duration === 1 ? "second" : "seconds"})`
                 : status === "error"
                   ? "Routing failed"
                   : "Ready"}
@@ -171,8 +193,15 @@ export function EmailRouter() {
         </section>
 
         <section className="branches" aria-label="Email forwarding routes">
+          <svg className="branch-paths" viewBox="0 0 80 100" preserveAspectRatio="none" aria-hidden="true">
+            {[...routes.filter((route) => route.id !== selectedRouteId), ...routes.filter((route) => route.id === selectedRouteId)].map((route) => {
+              const y = ((routes.findIndex((item) => item.id === route.id) + 0.5) / routes.length) * 100;
+              return <path key={route.id} className={route.id === selectedRouteId ? "selected" : ""}
+                d={`M 0 50 H 40 V ${y} H 80`} vectorEffect="non-scaling-stroke" />;
+            })}
+          </svg>
           <button className="add-route" type="button" onClick={() => void addRoute()}>
-            <span aria-hidden="true">＋</span> Add email
+            <span aria-hidden="true">＋</span> Add email with forwarding rules
           </button>
           <div className="route-list">
           {routes.map((route) => {
@@ -216,7 +245,7 @@ export function EmailRouter() {
                       ? "Saving..."
                       : saveStatus[route.id] === "error"
                         ? "Not saved"
-                        : "Saved"}
+                        : saveStatus[route.id] === "saved" ? "Saved" : ""}
                   </span>
                 </article>
               </div>
