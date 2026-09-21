@@ -5,5 +5,7 @@ out
 .env.local
 npm-debug.log*
 *.tsbuildinfo
+AGENTS.md
+CLAUDE.md
 data/*.json
 !data/.gitkeep
