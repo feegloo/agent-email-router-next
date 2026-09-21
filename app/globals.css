@@ -26,7 +26,7 @@ button, textarea, input { font: inherit; }
 .flow-grid {
   width: min(1550px, 100%);
   display: grid;
-  grid-template-columns: minmax(230px, 0.7fr) 64px minmax(360px, 0.84fr) minmax(310px, 0.8fr);
+  grid-template-columns: minmax(230px, 0.7fr) 64px minmax(390px, 0.94fr) minmax(280px, 0.7fr);
   align-items: center;
 }
 
@@ -107,8 +107,8 @@ textarea:focus {
 }
 
 .agent-panel {
-  min-height: 180px;
-  padding: 28px 20px;
+  min-height: 320px;
+  padding: 32px 20px;
   display: grid;
   align-content: center;
   justify-items: center;
@@ -122,7 +122,7 @@ textarea:focus {
 .agent-logs {
   width: 100%;
   min-width: 0;
-  height: 48px;
+  height: 80px;
   text-align: left;
   color: #91a5bd;
   font: 11px/16px ui-monospace, SFMono-Regular, Consolas, monospace;
