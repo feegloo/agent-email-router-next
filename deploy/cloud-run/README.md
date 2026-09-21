@@ -1,9 +1,9 @@
 # Cloud Run demo deployment
 
-Two private Cloud Run services, both with minimum instances 0:
+Two Cloud Run services, both with minimum instances 0:
 
-- `email-router`: Next.js on CPU, with a MailHog sidecar. Opening the UI and editing rules do not wake the GPU.
-- `email-router-gpu`: a small Node HTTP/log gateway and Ollama with one NVIDIA L4. Only routing and its temporary log stream call this service.
+- `email-router`: public Next.js UI on CPU, with a MailHog sidecar. Opening the UI and editing rules do not wake the GPU.
+- `email-router-gpu`: a private small Node HTTP/log gateway and Ollama with one NVIDIA L4. Only routing and its temporary log stream call this service.
 
 Qwen 3.5 0.8B is downloaded into the Ollama image during build. The first request after scale-to-zero still loads the model into GPU memory. Subsequent requests reuse the loaded model. A warm routing latency has not yet been measured in GCP.
 
@@ -21,15 +21,11 @@ export REGION=europe-west1
 bash deploy/cloud-run/deploy.sh
 ```
 
-The script creates an Artifact Registry repository, a private rules bucket, a dedicated runtime service account and the two services. It grants object access on that bucket and permission for the CPU service to invoke the GPU service. It does not create a service-account key or grant public access.
+The script creates an Artifact Registry repository, a private rules bucket, a dedicated runtime service account and the two services. It grants object access on that bucket and permission for the CPU service to invoke the GPU service. It does not create a service-account key.
 
-Access the private demo as an identity with `roles/run.invoker` (for example your project owner account):
+After deploying, the script enables public access only for `email-router` using `--no-invoker-iam-check` and prints its URL. Open that URL directly in your browser; no local proxy is needed. This works on both initial deployment and redeployment. `email-router-gpu` remains protected by Cloud Run IAM.
 
-```bash
-gcloud run services proxy email-router --port=3000 --region="$REGION" --project="$PROJECT_ID"
-```
-
-Then open http://localhost:3000. This is a cloud-hosted application behind a local authenticated proxy. Public sharing/login is a separate step, since route edits and raw logs currently have no per-user isolation.
+The public demo allows any visitor to send messages, edit shared routing rules and view raw logs during routing. There is no per-user isolation; visitor requests can incur GPU costs.
 
 ## Verify after deployment
 
