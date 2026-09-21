@@ -1,8 +1,5 @@
+import { EmailRouter } from "@/components/email-router";
+
 export default function Home() {
-  return (
-    <main>
-      <h1>Agent Email Router</h1>
-      <p>Next.js application is running.</p>
-    </main>
-  );
+  return <EmailRouter />;
 }
