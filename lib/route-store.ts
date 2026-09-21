@@ -10,7 +10,7 @@ import {
 
 const routesFilePath = path.isAbsolute(config.routesFilePath)
   ? config.routesFilePath
-  : path.join(process.cwd(), config.routesFilePath);
+  : path.join(/* turbopackIgnore: true */ process.cwd(), config.routesFilePath);
 
 let mutationQueue: Promise<unknown> = Promise.resolve();
 
