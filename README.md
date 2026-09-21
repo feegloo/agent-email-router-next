@@ -6,24 +6,6 @@ This repository is a Node.js and Next.js implementation based on the original Py
 
 ## What it does
 
-### Live container logs (local only)
-
-The three small lines below the agent status show actual Ollama stdout/stderr,
-not model response tokens. The container entrypoint duplicates output to a shared
-log file; Next.js mounts it read-only and sends each new complete line separately
-over `/api/agent/logs` (SSE), checking every 250 ms with a byte cursor.
-The UI queues bursts and adds one line at a time, keeping three visible lines.
-On connection, the latest three lines seed the display. Hover a line to read its full text.
-
-Run `docker compose up --build -d` after updating, including the `docker/`
-folder. No Docker socket is mounted. Logs reset when the Ollama container starts;
-the file grows during a session. This unauthenticated diagnostic endpoint is for
-local development only: logs may contain sensitive data. Do not expose it publicly.
-Outside Compose, set `OLLAMA_LOG_PATH` to a readable Ollama stdout/stderr log file.
-
-The inference timeout defaults to 600000 ms and can be changed with
-`OLLAMA_TIMEOUT_MS`. Longer timeouts do not accelerate CPU inference.
-
 1. The user writes a message in the browser.
 2. The Next.js server loads the latest forwarding emails and editable routing rules.
 3. A dynamic prompt and a constrained `forward_email` tool are sent to `qwen3.5:0.8b` through Ollama.
@@ -33,12 +15,56 @@ The inference timeout defaults to 600000 ms and can be changed with
 
 The model never provides the destination email address directly. It can only select an ID from the current list of routes, and the server resolves that ID to a saved email address.
 
+## Forwarding routes
+
+The application starts with three routes:
+
+- `human-resources@example.com`
+- `help-desk@example.com`
+- `other@example.com`
+
+Both the email address and its forwarding rule are editable. A change is saved to the server when the field loses focus. Routes can also be added and removed.
+
+Routes are persisted in the `routes_data` Docker volume. They are used to build a new agent prompt for every message, so changing a rule changes subsequent routing decisions without changing source code or restarting the application.
+
+
 ## Local services
 
 - Application: http://localhost:3000
 - Health endpoint: http://localhost:3000/api/health
 - MailHog inbox: http://localhost:8025
 - Ollama API: http://localhost:11434
+
+## API
+
+### Route a message
+
+```http
+POST /api/messages
+Content-Type: application/json
+
+{
+  "message": "I cannot access my company account"
+}
+```
+
+The request stays open while the local model processes the message and the email is sent. A successful response contains the selected route:
+
+```json
+{
+  "status": "forwarded",
+  "routeId": "help-desk",
+  "email": "help-desk@example.com"
+}
+```
+
+### Manage forwarding routes
+
+- `GET /api/routes`
+- `POST /api/routes`
+- `PATCH /api/routes/:id`
+- `DELETE /api/routes/:id`
+
 
 ## Run locally
 
@@ -75,17 +101,24 @@ Stop the services:
 docker compose down
 ```
 
-## Forwarding routes
+### Live container logs (local only)
 
-The application starts with three routes:
+The three small lines below the agent status show actual Ollama stdout/stderr,
+not model response tokens. The container entrypoint duplicates output to a shared
+log file; Next.js mounts it read-only and sends each new complete line separately
+over `/api/agent/logs` (SSE), checking every 250 ms with a byte cursor.
+The UI queues bursts and adds one line at a time, keeping three visible lines.
+On connection, the latest three lines seed the display. Hover a line to read its full text.
 
-- `human-resources@example.com`
-- `help-desk@example.com`
-- `other@example.com`
+Run `docker compose up --build -d` after updating, including the `docker/`
+folder. No Docker socket is mounted. Logs reset when the Ollama container starts;
+the file grows during a session. This unauthenticated diagnostic endpoint is for
+local development only: logs may contain sensitive data. Do not expose it publicly.
+Outside Compose, set `OLLAMA_LOG_PATH` to a readable Ollama stdout/stderr log file.
 
-Both the email address and its forwarding rule are editable. A change is saved to the server when the field loses focus. Routes can also be added and removed.
+The inference timeout defaults to 600000 ms and can be changed with
+`OLLAMA_TIMEOUT_MS`. Longer timeouts do not accelerate CPU inference.
 
-Routes are persisted in the `routes_data` Docker volume. They are used to build a new agent prompt for every message, so changing a rule changes subsequent routing decisions without changing source code or restarting the application.
 
 ## Development without the application container
 
@@ -115,36 +148,6 @@ make check
 ```
 
 This runs ESLint, TypeScript, unit tests, and the production build.
-
-## API
-
-### Route a message
-
-```http
-POST /api/messages
-Content-Type: application/json
-
-{
-  "message": "I cannot access my company account"
-}
-```
-
-The request stays open while the local model processes the message and the email is sent. A successful response contains the selected route:
-
-```json
-{
-  "status": "forwarded",
-  "routeId": "help-desk",
-  "email": "help-desk@example.com"
-}
-```
-
-### Manage forwarding routes
-
-- `GET /api/routes`
-- `POST /api/routes`
-- `PATCH /api/routes/:id`
-- `DELETE /api/routes/:id`
 
 ## Configuration
 
