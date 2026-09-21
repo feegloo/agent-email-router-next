@@ -375,3 +375,6 @@ textarea:focus {
 .warning-message { margin: -6px 0 0; color: #f4c86a; font-size: 0.9rem; line-height: 1.4; }
 
 .forwarded-badge.warning { background: #f4c86a; color: #241900; }
+
+.message-panel input { padding: 10px 16px; font-size: 14px; border-radius: 0; }
+.message-panel input:focus { outline: 2px solid #22ddd4; outline-offset: 1px; }

@@ -10,6 +10,7 @@ type SaveStatus = "idle" | "saving" | "saved" | "error";
 
 export function EmailRouter() {
   const [routes, setRoutes] = useState<ForwardingRoute[]>([]);
+  const [email, setEmail] = useState("");
   const [message, setMessage] = useState("");
   const [status, setStatus] = useState<FlowStatus>("idle");
   const [selectedRouteId, setSelectedRouteId] = useState<string | null>(null);
@@ -43,7 +44,7 @@ export function EmailRouter() {
 
   async function sendMessage(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    if (!message.trim() || status === "processing") return;
+    if (!message.trim() || !email.trim() || status === "processing") return;
 
     setWarning(null);
     setStatus("processing");
@@ -55,7 +56,7 @@ export function EmailRouter() {
       const response = await fetch("/api/messages", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ message }),
+        body: JSON.stringify({ message, email: email.trim() }),
       });
       const data = (await response.json()) as { routeId?: string; error?: string; warning?: string };
       if (!response.ok || !data.routeId) {
@@ -177,7 +178,19 @@ export function EmailRouter() {
             placeholder="Example: I need to take three days off starting tomorrow"
             rows={5}
           />
-          <button type="submit" disabled={!message.trim() || status === "processing"}>
+          <label className="sr-only" htmlFor="sender-email">Your email</label>
+          <input
+            id="sender-email"
+            name="email"
+            type="email"
+            autoComplete="email"
+            placeholder="email"
+            required
+            maxLength={254}
+            value={email}
+            onChange={(event) => setEmail(event.target.value)}
+          />
+          <button type="submit" disabled={!message.trim() || !email.trim() || status === "processing"}>
             {status === "processing" ? "Sending..." : "Send message"}
           </button>
           {error ? <p className="error-message">{error}</p> : null}
@@ -279,7 +292,7 @@ export function EmailRouter() {
             <path d="M12 .297C5.37.297 0 5.67 0 12.297c0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.043-1.61-4.043-1.61-.546-1.387-1.333-1.756-1.333-1.756-1.09-.745.083-.729.083-.729 1.205.084 1.838 1.237 1.838 1.237 1.07 1.835 2.809 1.305 3.495.998.108-.776.418-1.305.762-1.605-2.665-.305-5.467-1.334-5.467-5.931 0-1.31.469-2.381 1.236-3.221-.124-.303-.536-1.524.117-3.176 0 0 1.008-.323 3.301 1.23a11.52 11.52 0 0 1 3.003-.404c1.02.005 2.045.138 3.003.404 2.291-1.553 3.297-1.23 3.297-1.23.655 1.652.243 2.873.12 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222 0 1.606-.015 2.898-.015 3.293 0 .322.216.694.825.576C20.565 22.092 24 17.597 24 12.297c0-6.627-5.373-12-12-12" />
           </svg>
         </a>
-        <span>Built with: Next.js | Node.js | TypeScript | Ollama | MailHog | Docker</span>
+        <span>Built with: Next.js | Node.js | TypeScript | Ollama | MailHog | Docker | Google Cloud Platform</span>
       </footer>
     </main>
   );

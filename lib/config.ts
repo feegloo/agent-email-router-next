@@ -25,6 +25,5 @@ export const config = {
   smtpRequireTls: process.env.SMTP_REQUIRE_TLS === "true",
   allowedRecipients: (process.env.EMAIL_ALLOWED_RECIPIENTS ?? "").split(",").map(value => value.trim().toLowerCase()).filter(Boolean),
   emailFrom: process.env.EMAIL_FROM ?? "agent-email-router@example.com",
-  defaultSenderEmail: process.env.DEFAULT_SENDER_EMAIL ?? "user@example.com",
   routesFilePath: process.env.ROUTES_FILE_PATH ?? "./data/routes.json",
 } as const;

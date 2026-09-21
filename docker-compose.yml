@@ -11,7 +11,6 @@ services:
       SMTP_HOST: mailhog
       SMTP_PORT: 1025
       EMAIL_FROM: agent-email-router@example.com
-      DEFAULT_SENDER_EMAIL: user@example.com
       ROUTES_FILE_PATH: /app/data/routes.json
     volumes:
       - routes_data:/app/data

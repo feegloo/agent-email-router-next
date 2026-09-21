@@ -1,4 +1,3 @@
-import { config } from "@/lib/config";
 import { sendEmail } from "@/lib/email";
 import { getRoutes } from "@/lib/route-store";
 import { selectForwardingRoute } from "@/lib/routing-agent";
@@ -9,7 +8,7 @@ export async function POST(request: Request) {
 
   if (!input.success) {
     return Response.json(
-      { error: "A non-empty message is required." },
+      { error: "A non-empty message and a valid email address are required." },
       { status: 400 },
     );
   }
@@ -20,7 +19,7 @@ export async function POST(request: Request) {
     try {
       await sendEmail({
       to: route.email,
-      replyTo: config.defaultSenderEmail,
+      replyTo: input.data.email,
       body: input.data.message,
       });
     } catch (error) {

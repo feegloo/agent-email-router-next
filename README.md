@@ -10,7 +10,7 @@ https://github.com/user-attachments/assets/69900e98-ba3f-4342-a3e6-d48a89b08e3e
 
 ## What it does
 
-1. The user writes a message in the browser.
+1. The user writes a message and enters their email address in the browser.
 2. The Next.js server loads the latest forwarding emails and editable routing rules.
 3. A dynamic prompt and a constrained `forward_email` tool are sent to `qwen3.5:0.8b` through Ollama.
 4. The model selects one server-defined `routeId`.
@@ -48,6 +48,7 @@ POST /api/messages
 Content-Type: application/json
 
 {
+  "email": "adam.nowak@example.com",
   "message": "I cannot access my company account"
 }
 ```
@@ -61,6 +62,8 @@ The request stays open while the local model processes the message and the email
   "email": "help-desk@example.com"
 }
 ```
+
+Both `email` and `message` are required. The sender email is validated and used as `Reply-To` and in the message subject. `From` remains the configured agent address (`EMAIL_FROM`). SMTP acceptance does not confirm inbox delivery. If routing succeeds but SMTP submission fails, the response retains the selected route with `status: "routed"` and a `warning`; the UI keeps the arrows green and shows a yellow warning.
 
 ### Manage forwarding routes
 
@@ -167,4 +170,4 @@ This small model is fast enough for a local demonstration but can occasionally o
 
 ## Cloud deployment
 
-See [Cloud Run deployment](deploy/cloud-run/README.md) for a private, scale-to-zero demo with a separate L4 GPU service, persistent routing rules, and MailHog email capture.
+See [Cloud Run deployment](deploy/cloud-run/README.md) for a public, scale-to-zero UI with a private L4 GPU service, persistent routing rules, and authenticated external SMTP. MailHog is used locally only.
