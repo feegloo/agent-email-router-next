@@ -207,7 +207,7 @@ export function EmailRouter() {
             })}
           </svg>
           <button className="add-route" type="button" onClick={() => void addRoute()}>
-            <span aria-hidden="true">＋</span> Add email with forwarding rules
+            <span aria-hidden="true">＋</span> Add email with routing rules
           </button>
           <div className="route-list">
           {routes.map((route) => {
@@ -237,7 +237,7 @@ export function EmailRouter() {
                     onBlur={() => void saveRoute(route)}
                   />
                   <label className="rule-label" htmlFor={`rule-${route.id}`}>
-                    Email forwarding rules
+                    Email routing rules
                   </label>
                   <textarea
                     id={`rule-${route.id}`}
