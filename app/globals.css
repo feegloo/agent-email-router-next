@@ -43,6 +43,10 @@ button, textarea, input { font: inherit; }
   gap: 14px;
 }
 
+.message-panel textarea {
+  font-size: 12px;
+}
+
 .message-panel h1 {
   margin: 0;
   font-size: 0.8125rem;
