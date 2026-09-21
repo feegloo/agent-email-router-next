@@ -194,7 +194,7 @@ export function EmailRouter() {
             {status === "processing" ? "Sending..." : "Send message"}
           </button>
           {error ? <p className="error-message">{error}</p> : null}
-          {warning ? <p className="warning-message" role="status">{warning}</p> : null}
+          {warning ? <p className="warning-message" role="status">The message was forwarded by the agent but couldn&apos;t be emailed.</p> : null}
         </form>
 
         <div className={`flow-arrow ${flowStarted ? "active" : ""}`} aria-hidden="true" />
@@ -236,7 +236,7 @@ export function EmailRouter() {
               <div className={`route-row ${selected ? "selected" : ""}`} key={route.id}>
                 <div className="branch-connector" aria-hidden="true" />
                 <article className="panel route-card">
-                  {selected ? <span className={`forwarded-badge ${warning ? "warning" : ""}`} title={warning ?? "The SMTP server accepted the message; inbox delivery is not yet confirmed."}>{warning === "Email address not found" ? "Email address not found" : warning ? "Email not sent" : "Accepted by SMTP"}</span> : null}
+                  {selected ? <span className={`forwarded-badge ${warning ? "warning" : ""}`} title={warning ?? "The SMTP server accepted the message; inbox delivery is not yet confirmed."}>{warning === "Email address not found" ? "Email address not found" : warning ? "Email cannot be sent to this address" : "Message sent to email address"}</span> : null}
                   <button
                     className="delete-route"
                     type="button"
