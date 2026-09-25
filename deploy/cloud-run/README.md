@@ -24,6 +24,8 @@ bash deploy/cloud-run/deploy.sh
 
 The script creates an Artifact Registry repository, a private rules bucket, a dedicated runtime service account and the two services. It grants object access on that bucket and permission for the CPU service to invoke the GPU service. It does not create a service-account key.
 
+After both services deploy successfully, the script removes local images for this project's `app`, `gateway` and `ollama` repositories, including tags left by earlier deploys. Cloud Run uses the copies in Artifact Registry. Docker build cache stays available for faster subsequent builds, and other local project images and volumes are untouched. To clear all unused local Docker images and build cache manually, run `docker system prune -a -f` and `docker buildx prune -a -f`.
+
 After deploying, the script enables public access only for `email-router` using `--no-invoker-iam-check` and prints its URL. Open that URL directly in your browser; no local proxy is needed. This works on both initial deployment and redeployment. `email-router-gpu` remains protected by Cloud Run IAM.
 
 The public demo allows any visitor to send messages, edit shared routing rules and view raw logs during routing. There is no per-user isolation; visitor requests can incur GPU costs.
