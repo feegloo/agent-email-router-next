@@ -19,11 +19,8 @@ type SendEmailInput = {
 };
 
 export async function sendEmail({ body, replyTo, to }: SendEmailInput): Promise<void> {
-  if (process.env.K_SERVICE && (!config.smtpUser || !config.smtpPassword || !config.allowedRecipients.length)) {
-    throw new Error("Production SMTP and allowed recipients must be configured.");
-  }
-  if (config.allowedRecipients.length && !config.allowedRecipients.includes(to.trim().toLowerCase())) {
-    throw new Error("This email address is not enabled for delivery in this demo.");
+  if (process.env.K_SERVICE && (!config.smtpUser || !config.smtpPassword)) {
+    throw new Error("Production SMTP credentials must be configured.");
   }
   await transporter.sendMail({
     from: config.emailFrom,

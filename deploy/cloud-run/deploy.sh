@@ -5,10 +5,9 @@ REGION=${REGION:-europe-west1}
 : "${SMTP_HOST:?Set SMTP_HOST from your email provider}"
 : "${SMTP_USER:?Set SMTP_USER}"
 : "${EMAIL_FROM:?Set EMAIL_FROM to an approved sender}"
-: "${EMAIL_ALLOWED_RECIPIENTS:?Set EMAIL_ALLOWED_RECIPIENTS to comma-separated demo recipient addresses}"
 SMTP_PASSWORD_SECRET=${SMTP_PASSWORD_SECRET:-email-router-smtp-password}
 : "${SMTP_PASSWORD_VERSION:?Set SMTP_PASSWORD_VERSION to a numeric Secret Manager version}"
-export SMTP_HOST SMTP_USER EMAIL_FROM EMAIL_ALLOWED_RECIPIENTS SMTP_PASSWORD_SECRET SMTP_PASSWORD_VERSION
+export SMTP_HOST SMTP_USER EMAIL_FROM SMTP_PASSWORD_SECRET SMTP_PASSWORD_VERSION
 [[ "$SMTP_PASSWORD_VERSION" =~ ^[1-9][0-9]*$ ]] || { echo 'Invalid SMTP_PASSWORD_VERSION'; exit 1; }
 [[ "$PROJECT_ID" =~ ^[a-z][a-z0-9-]{4,28}[a-z0-9]$ ]] || { echo 'Invalid PROJECT_ID'; exit 1; }
 [[ "$REGION" =~ ^[a-z]+-[a-z]+[0-9]+$ ]] || { echo 'Invalid REGION'; exit 1; }

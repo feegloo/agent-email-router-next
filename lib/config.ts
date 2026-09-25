@@ -23,7 +23,6 @@ export const config = {
   smtpPassword: process.env.SMTP_PASSWORD,
   smtpSecure: process.env.SMTP_SECURE === "true",
   smtpRequireTls: process.env.SMTP_REQUIRE_TLS === "true",
-  allowedRecipients: (process.env.EMAIL_ALLOWED_RECIPIENTS ?? "").split(",").map(value => value.trim().toLowerCase()).filter(Boolean),
   emailFrom: process.env.EMAIL_FROM ?? "agent-email-router@example.com",
   routesFilePath: process.env.ROUTES_FILE_PATH ?? "./data/routes.json",
 } as const;

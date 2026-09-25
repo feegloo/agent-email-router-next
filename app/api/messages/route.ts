@@ -25,13 +25,11 @@ export async function POST(request: Request) {
     } catch (error) {
       const failure = error as { code?: string; responseCode?: number; command?: string; response?: string; message?: string };
       console.error("Email submission failed", { code: failure.code, responseCode: failure.responseCode, command: failure.command });
-      const warning = failure.message === "This email address is not enabled for delivery in this demo."
-        ? failure.message
-        : failure.code === "EAUTH"
-          ? "SMTP authentication failed. Email was not sent."
-          : failure.command === "RCPT TO" && /\b5\.1\.1\b/.test(failure.response ?? "")
-            ? "Email address not found"
-            : "Email could not be submitted to SMTP. Check the server configuration and Mailgun logs.";
+      const warning = failure.code === "EAUTH"
+        ? "SMTP authentication failed. Email was not sent."
+        : failure.command === "RCPT TO" && /\b5\.1\.1\b/.test(failure.response ?? "")
+          ? "Email address not found"
+          : "Email could not be submitted to SMTP. Check the server configuration and Mailgun logs.";
       return Response.json({ status: "routed", routeId: route.id, email: route.email, warning });
     }
 

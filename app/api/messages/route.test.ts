@@ -6,10 +6,10 @@ vi.mock("@/lib/routing-agent", () => ({ selectForwardingRoute: async () => ({ id
 import { POST } from "./route";
 it("keeps the selected route when email submission fails, then allows another send", async () => {
   const request = () => new Request("http://localhost/api/messages", { method: "POST", body: JSON.stringify({ message: "I need leave", email: "sender@example.org" }) });
-  sendEmail.mockRejectedValueOnce(new Error("This email address is not enabled for delivery in this demo."));
+  sendEmail.mockRejectedValueOnce(Object.assign(new Error("Recipient rejected"), { code: "EENVELOPE", command: "RCPT TO", response: "550 5.1.1 User unknown" }));
   const failedDelivery = await POST(request());
   expect(failedDelivery.status).toBe(200);
-  expect(await failedDelivery.json()).toMatchObject({ status: "routed", routeId: "hr", warning: expect.any(String) });
+  expect(await failedDelivery.json()).toMatchObject({ status: "routed", routeId: "hr", warning: "Email address not found" });
   sendEmail.mockResolvedValueOnce(undefined);
   expect(sendEmail).toHaveBeenCalledWith(expect.objectContaining({ replyTo: "sender@example.org" }));
   expect(await (await POST(request())).json()).toMatchObject({ status: "forwarded", routeId: "hr" });
