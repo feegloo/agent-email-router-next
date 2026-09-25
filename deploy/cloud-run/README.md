@@ -2,10 +2,10 @@
 
 Two Cloud Run services, both with minimum instances 0:
 
-- `email-router`: public Next.js UI on CPU, using an external SMTP provider. Opening the UI and editing rules do not wake the GPU.
-- `email-router-gpu`: a private small Node HTTP/log gateway and Ollama with one NVIDIA L4. Only routing and its temporary log stream call this service.
+- `email-router`: public Next.js UI on CPU, using an external SMTP provider. Opening the UI sends one warmup request to wake the GPU and load the model.
+- `email-router-gpu`: a private small Node HTTP/log gateway and Ollama with one NVIDIA L4. The page warmup, routing and the temporary log stream call this service.
 
-Qwen 3.5 0.8B is downloaded into the Ollama image during build. The first request after scale-to-zero still loads the model into GPU memory. Subsequent requests reuse the loaded model. A warm routing latency has not yet been measured in GCP.
+Qwen 3.5 0.8B is downloaded into the Ollama image during build. Opening the UI sends an authenticated warmup request to load the model into GPU memory after scale-to-zero. A routing request arriving during warmup waits for the same load to complete, then runs normally. Concurrent warmup requests share one in-memory promise per GPU instance. A warm routing latency has not yet been measured in GCP.
 
 Rules live in a private Cloud Storage bucket. Updates use object generation preconditions and retry conflicts, including during overlapping deployments. Local Docker Compose continues using its existing JSON volume.
 
@@ -54,13 +54,13 @@ See [Google's authenticated proxy documentation](https://docs.cloud.google.com/r
 
 ## Verify after deployment
 
-1. Open the UI and edit a rule. Confirm the GPU has not started merely from opening the page.
+1. Open the UI. Confirm it starts one GPU warmup and that a message sent during warmup waits before invoking the model.
 2. Send a holiday request. Check live raw logs and the selected HR route. Record first-request and warm-request times separately.
 3. Verify the browser closes `/api/agent/logs` on success and on failure. After idle time, both services should reach zero instances.
 4. Confirm edited rules survive a restart/redeployment.
 5. Test a failed routing request, then retry successfully. There must be no stuck Sending state.
 
-Logs show actual Ollama stdout/stderr, not model answer tokens. The gateway exposes only `/api/chat`, `/api/ps`, `/logs`, and `/health`; Cloud Run IAM protects the service. The SSE stream also has a finite lifetime in case a browser disconnect is not propagated.
+Logs show actual Ollama stdout/stderr, not model answer tokens. The gateway exposes only `/api/chat`, `/api/ps`, `/warmup`, `/logs`, and `/health`; Cloud Run IAM protects the service. The SSE stream also has a finite lifetime in case a browser disconnect is not propagated.
 
 ## Email behavior
 
@@ -96,7 +96,7 @@ References: [Mailgun sandbox](https://documentation.mailgun.com/docs/mailgun/use
 
 The GPU service uses L4 without zonal redundancy, 4 vCPU/16 GiB for Ollama and 1 vCPU/512 MiB for the gateway. Instance-based billing charges startup, processing and idle time before shutdown. Scale-to-zero is automatic, not immediate after each message. Maximum instances is 1 per revision; temporary overlap can happen during deployments. This is not a hard spending cap.
 
-Artifact Registry images and the rules bucket have small ongoing storage charges even when services are at zero. No scheduler or health probe calls the GPU service. Do not add uptime monitoring to its URL if you want it to sleep.
+Artifact Registry images and the rules bucket have small ongoing storage charges even when services are at zero. Opening the public UI calls the GPU service once, so even visitors who do not send a message can incur GPU charges. The GPU instance scales down independently after inactivity; it does not shut down at the exact moment the CPU service stops. No scheduler or health probe calls it.
 
 ## Stop the demo
 

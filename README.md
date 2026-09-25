@@ -212,6 +212,6 @@ git pull origin main
 bash deploy/cloud-run/deploy.sh
 ```
 
-The deployment uses a public CPU service for the UI and a private L4 GPU service for Ollama. Both have minimum instances set to zero. Opening the UI or editing rules does not wake the GPU; routing does. Shutdown after inactivity is not immediate, and storage/image charges remain.
+The deployment uses a public CPU service for the UI and a private L4 GPU service for Ollama. Both have minimum instances set to zero. Opening the UI wakes the GPU and loads the model. A message submitted during warmup waits until loading completes. The GPU scales to zero independently after inactivity, so page visits incur GPU costs even without a sent message. Shutdown after inactivity is not immediate, and storage/image charges remain.
 
 Routes are shared by visitors to the public demo. For authenticated access through a local proxy, see the [proxy instructions](deploy/cloud-run/README.md#access-through-an-authenticated-local-proxy).
