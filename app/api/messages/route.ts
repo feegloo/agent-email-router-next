@@ -24,7 +24,12 @@ export async function POST(request: Request) {
       });
     } catch (error) {
       const failure = error as { code?: string; responseCode?: number; command?: string; response?: string; message?: string };
-      console.error("Email submission failed", { code: failure.code, responseCode: failure.responseCode, command: failure.command });
+      console.error("Email submission failed", {
+        code: failure.code,
+        responseCode: failure.responseCode,
+        command: failure.command,
+        response: failure.response?.slice(0, 500),
+      });
       const warning = failure.code === "EAUTH"
         ? "SMTP authentication failed. Email was not sent."
         : failure.command === "RCPT TO" && /\b5\.1\.1\b/.test(failure.response ?? "")
