@@ -4,7 +4,7 @@ import { createAgentPrompt } from "@/lib/routing-agent";
 import type { ForwardingRoute } from "@/lib/routes";
 
 describe("createAgentPrompt", () => {
-  it("adds the current server-side routes to every agent prompt", () => {
+  it("adds the routes supplied with the message to the agent prompt", () => {
     const routes: ForwardingRoute[] = [
       {
         id: "legal",

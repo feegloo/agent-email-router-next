@@ -1,5 +1,4 @@
 import { sendEmail } from "@/lib/email";
-import { getRoutes } from "@/lib/route-store";
 import { selectForwardingRoute } from "@/lib/routing-agent";
 import { messageInputSchema } from "@/lib/schemas/message";
 
@@ -8,19 +7,19 @@ export async function POST(request: Request) {
 
   if (!input.success) {
     return Response.json(
-      { error: "A non-empty message and a valid email address are required." },
+      { error: "A message, a sender email and valid email routing rules are required." },
       { status: 400 },
     );
   }
 
   try {
-    const route = await selectForwardingRoute(input.data.message, await getRoutes());
+    const route = await selectForwardingRoute(input.data.message, input.data.routes);
 
     try {
       await sendEmail({
-      to: route.email,
-      replyTo: input.data.email,
-      body: input.data.message,
+        to: route.email,
+        replyTo: input.data.email,
+        body: input.data.message,
       });
     } catch (error) {
       const failure = error as { code?: string; responseCode?: number; command?: string; response?: string; message?: string };
