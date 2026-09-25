@@ -237,7 +237,7 @@ export function EmailRouter() {
           <p>
             <span className="status-dot" />
             {status === "processing"
-              ? (modelInitializing ? "Processing... (initializing model, please wait one minute...)" : "Processing...")
+              ? (modelInitializing ? "Processing... (initializing model, please wait)" : "Processing...")
               : status === "forwarded"
                 ? `Processing complete (${duration} ${duration === 1 ? "second" : "seconds"})`
                 : status === "error"
