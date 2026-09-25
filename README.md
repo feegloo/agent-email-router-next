@@ -42,7 +42,7 @@ Routing and email submission are separate steps:
 - Once the agent selects a route, the full path stays green, even if email submission fails.
 - Successful SMTP submission shows **Message sent to email address, check spam if not visible**.
 - A submission warning shows a yellow **Email cannot be sent to this address** badge and **The message was routed by the agent but couldn't be emailed.** below the form.
-- If SMTP explicitly reports that the recipient does not exist (5.1.1 during RCPT TO), the yellow badge says **Email address not found**. A demo recipient restriction does not prove that an address is invalid.
+- If SMTP explicitly reports that the recipient does not exist (5.1.1 during RCPT TO), the yellow badge says **Email address not found**. An SMTP rejection does not always prove that an address is invalid.
 - An actual routing failure shows a red status. Both routing errors and email warnings allow another message to be sent.
 
 **SMTP acceptance is not a delivery receipt.** A provider can accept a message and later have it rejected by Gmail, or deliver it to spam. The app does not currently consume delivery webhooks, so later bounces and spam placement do not update the UI. Use the provider's delivery logs to investigate.
@@ -197,11 +197,11 @@ See [Cloud Run deployment](deploy/cloud-run/README.md) for a public, scale-to-ze
 
 - **Local Docker Compose:** MailHog captures messages at http://localhost:8025. No email is delivered to external inboxes.
 - **Cloud Run:** MailHog is not deployed. Nodemailer uses authenticated external SMTP (currently Mailgun for the demo), with the password stored in Google Secret Manager.
-- **Allowed recipients:** `EMAIL_ALLOWED_RECIPIENTS` is a server-side, comma-separated list of exact destination addresses. Editing a route in the browser does not add it to this list. The user's `Reply-To` address is separate from this destination restriction.
+- **Recipients:** Any saved route address can be submitted to SMTP. The user's `Reply-To` address remains separate from the selected destination.
 - **Mailgun sandbox:** Destinations must also be authorized in Mailgun. Replace a default `example.com` route with an authorized inbox to test real delivery.
 - **Delivery troubleshooting:** Check both spam and Mailgun logs. During testing, Gmail rejected some sandbox messages with `550 5.7.40` (DMARC alignment); a later test reached spam with an unauthenticated-sender warning. A green path confirms routing, not inbox placement.
 
-For a custom sending domain, configure SPF, DKIM and DMARC with alignment to the `From` domain. Correct authentication helps delivery but does not guarantee avoiding spam. Moving from sandbox to a custom domain does not remove the application's recipient allowlist.
+For a custom sending domain, configure SPF, DKIM and DMARC with alignment to the `From` domain. Correct authentication helps delivery but does not guarantee avoiding spam. Mailgun sandbox still requires recipients to be authorized there.
 
 ### Redeploy
 

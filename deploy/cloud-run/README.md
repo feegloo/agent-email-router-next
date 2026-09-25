@@ -60,7 +60,7 @@ See [Google's authenticated proxy documentation](https://docs.cloud.google.com/r
 4. Confirm edited rules survive a restart/redeployment.
 5. Test a failed routing request, then retry successfully. There must be no stuck Sending state.
 
-Logs show actual Ollama stdout/stderr, not model answer tokens. The gateway exposes only `/api/chat`, `/logs`, and `/health`; Cloud Run IAM protects the service. The SSE stream also has a finite lifetime in case a browser disconnect is not propagated.
+Logs show actual Ollama stdout/stderr, not model answer tokens. The gateway exposes only `/api/chat`, `/api/ps`, `/logs`, and `/health`; Cloud Run IAM protects the service. The SSE stream also has a finite lifetime in case a browser disconnect is not propagated.
 
 ## Email behavior
 
@@ -79,7 +79,6 @@ export SMTP_HOST=smtp.mailgun.org
 export SMTP_PORT=587
 export SMTP_USER=postmaster@sandboxYOUR_DOMAIN.mailgun.org
 export EMAIL_FROM=router@sandboxYOUR_DOMAIN.mailgun.org
-export EMAIL_ALLOWED_RECIPIENTS=your-inbox@example.com
 export SMTP_PASSWORD_SECRET=email-router-smtp-password
 export SMTP_PASSWORD_VERSION=1
 bash deploy/cloud-run/deploy.sh
@@ -89,7 +88,7 @@ The script grants the runtime service account access to this secret and pins its
 
 Change one route's email address in the UI to your authorized inbox, leaving its routing rule intact, then send a matching message. Check your inbox, spam folder and Mailgun sending logs. The default `example.com` destinations will not deliver real email.
 
-The server checks `EMAIL_ALLOWED_RECIPIENTS` (comma-separated exact addresses) before SMTP delivery. Public visitors can edit routing rules, but cannot expand this server-side list. Mailgun sandbox additionally restricts delivery to its verified recipients. Use a verified custom sending domain for delivery beyond sandbox recipients.
+The app sends to any address selected from the saved routes and reports an SMTP rejection as a delivery warning while keeping the selected route highlighted. Mailgun sandbox still restricts delivery to its verified recipients. Use a verified custom sending domain for delivery beyond sandbox recipients.
 
 References: [Mailgun sandbox](https://documentation.mailgun.com/docs/mailgun/user-manual/domains/domains-sandbox), [Cloud Run secrets](https://docs.cloud.google.com/run/docs/configuring/services/secrets).
 
