@@ -17,6 +17,7 @@ export function EmailRouter() {
   const [error, setError] = useState<string | null>(null);
   const [saveStatus, setSaveStatus] = useState<Record<string, SaveStatus>>({});
   const [warning, setWarning] = useState<string | null>(null);
+  const [modelInitializing, setModelInitializing] = useState(false);
   const [duration, setDuration] = useState(0);
   const savedRoutes = useRef<Record<string, string>>({});
   const saveTimers = useRef<Record<string, ReturnType<typeof setTimeout>>>({});
@@ -42,10 +43,31 @@ export function EmailRouter() {
       );
   }, []);
 
+  useEffect(() => {
+    if (status !== "processing") return;
+    const controller = new AbortController();
+    let timer: ReturnType<typeof setTimeout>;
+    async function pollModel() {
+      try {
+        const response = await fetch("/api/agent/model-state", {
+          signal: controller.signal, cache: "no-store",
+        });
+        if (response.ok) {
+          const data = await response.json() as { state: string };
+          if (!controller.signal.aborted) setModelInitializing(data.state === "initializing");
+        }
+      } catch { /* Status checks must not interrupt message routing. */ }
+      if (!controller.signal.aborted) timer = setTimeout(pollModel, 1000);
+    }
+    void pollModel();
+    return () => { controller.abort(); clearTimeout(timer); };
+  }, [status]);
+
   async function sendMessage(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     if (!message.trim() || !email.trim() || status === "processing") return;
 
+    setModelInitializing(false);
     setWarning(null);
     setStatus("processing");
     setSelectedRouteId(null);
@@ -208,7 +230,7 @@ export function EmailRouter() {
           <p>
             <span className="status-dot" />
             {status === "processing"
-              ? "Processing..."
+              ? (modelInitializing ? "Processing... (initializing model, please wait one minute...)" : "Processing...")
               : status === "forwarded"
                 ? `Processing complete (${duration} ${duration === 1 ? "second" : "seconds"})`
                 : status === "error"

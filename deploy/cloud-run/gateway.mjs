@@ -40,6 +40,16 @@ http.createServer((req, res) => {
     res.on('close', () => { clients.delete(res); clearTimeout(deadline); clearInterval(heartbeat); });
     return;
   }
+  if (req.url === '/api/ps' && req.method === 'GET') {
+    const probe = http.get('http://127.0.0.1:11434/api/ps', response => {
+      res.writeHead(response.statusCode ?? 502, { 'Content-Type': 'application/json' });
+      response.pipe(res);
+    });
+    probe.setTimeout(4000, () => probe.destroy(new Error('Status timeout')));
+    probe.on('error', () => { if (!res.headersSent) res.writeHead(503); res.end(); });
+    res.on('close', () => probe.destroy());
+    return;
+  }
   if (req.url !== '/api/chat' || req.method !== 'POST') { res.writeHead(404); res.end(); return; }
   active++;
   const upstream = http.request({ hostname: '127.0.0.1', port: 11434, path: '/api/chat', method: 'POST', headers: { 'Content-Type': 'application/json' } }, response => {
