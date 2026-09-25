@@ -41,7 +41,7 @@ Routing and email submission are separate steps:
 
 - Once the agent selects a route, the full path stays green, even if email submission fails.
 - Successful SMTP submission shows **Message sent to email address, check spam if not visible**.
-- A submission warning shows a yellow **Email cannot be sent to this address** badge and **The message was forwarded by the agent but couldn't be emailed.** below the form.
+- A submission warning shows a yellow **Email cannot be sent to this address** badge and **The message was routed by the agent but couldn't be emailed.** below the form.
 - If SMTP explicitly reports that the recipient does not exist (5.1.1 during RCPT TO), the yellow badge says **Email address not found**. A demo recipient restriction does not prove that an address is invalid.
 - An actual routing failure shows a red status. Both routing errors and email warnings allow another message to be sent.
 
