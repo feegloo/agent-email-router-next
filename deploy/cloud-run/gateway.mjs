@@ -1,11 +1,34 @@
 import http from 'node:http';
+import { open } from 'node:fs/promises';
 
 const clients = new Set();
 let pending = '';
 let offset = 0;
 let active = 0;
 const tail = [];
-const { open } = await import('node:fs/promises');
+const ollamaOrigin = process.env.OLLAMA_INTERNAL_URL ?? 'http://127.0.0.1:11434';
+const model = process.env.OLLAMA_MODEL ?? 'qwen3.5:0.8b';
+let warmupPromise;
+
+function warmModel() {
+  if (!warmupPromise) {
+    warmupPromise = (async () => {
+      const response = await fetch(new URL('/api/generate', ollamaOrigin), {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ model, stream: false, keep_alive: -1 }),
+        signal: AbortSignal.timeout(600000),
+      });
+      if (!response.ok) throw new Error(`Ollama preload returned HTTP ${response.status}`);
+      const result = await response.json();
+      if (result.error) throw new Error(`Ollama preload failed: ${result.error}`);
+    })().catch(error => {
+      warmupPromise = undefined;
+      throw error;
+    });
+  }
+  return warmupPromise;
+}
 
 // This is the actual Ollama stdout/stderr file shared by the sidecar.
 setInterval(async () => {
@@ -41,7 +64,7 @@ http.createServer((req, res) => {
     return;
   }
   if (req.url === '/api/ps' && req.method === 'GET') {
-    const probe = http.get('http://127.0.0.1:11434/api/ps', response => {
+    const probe = http.get(new URL('/api/ps', ollamaOrigin), response => {
       res.writeHead(response.statusCode ?? 502, { 'Content-Type': 'application/json' });
       response.pipe(res);
     });
@@ -50,17 +73,38 @@ http.createServer((req, res) => {
     res.on('close', () => probe.destroy());
     return;
   }
+  if (req.url === '/warmup' && req.method === 'POST') {
+    void warmModel().then(() => {
+      if (!res.destroyed) { res.writeHead(200, { 'Content-Type': 'application/json' }); res.end('{"status":"ready"}'); }
+    }).catch(error => {
+      console.error('Model warmup failed', error);
+      if (!res.destroyed) { res.writeHead(503); res.end('{"error":"Model warmup failed"}'); }
+    });
+    return;
+  }
   if (req.url !== '/api/chat' || req.method !== 'POST') { res.writeHead(404); res.end(); return; }
   active++;
-  const upstream = http.request({ hostname: '127.0.0.1', port: 11434, path: '/api/chat', method: 'POST', headers: { 'Content-Type': 'application/json' } }, response => {
-    res.writeHead(response.statusCode ?? 502, { 'Content-Type': 'application/json' });
-    response.pipe(res);
-  });
-  upstream.setTimeout(600000, () => upstream.destroy(new Error('Ollama timeout')));
-  upstream.on('error', () => { if (!res.headersSent) res.writeHead(502); res.end('{"error":"Ollama unavailable"}'); });
+  req.pause();
+  let upstream;
   res.on('close', () => {
-    upstream.destroy(); active--;
+    upstream?.destroy();
+    active--;
     if (active === 0) for (const client of clients) client.end();
   });
-  req.pipe(upstream);
-}).listen(Number(process.env.PORT ?? 8080), '0.0.0.0');
+  void warmModel().then(() => {
+    if (res.destroyed) return;
+    upstream = http.request(new URL('/api/chat', ollamaOrigin), { method: 'POST', headers: { 'Content-Type': 'application/json' } }, response => {
+      res.writeHead(response.statusCode ?? 502, { 'Content-Type': 'application/json' });
+      response.pipe(res);
+    });
+    upstream.setTimeout(600000, () => upstream.destroy(new Error('Ollama timeout')));
+    upstream.on('error', () => { if (!res.headersSent) res.writeHead(502); res.end('{"error":"Ollama unavailable"}'); });
+    req.pipe(upstream);
+    req.resume();
+  }).catch(error => {
+    console.error('Model warmup failed before routing', error);
+    if (!res.destroyed) { res.writeHead(503); res.end('{"error":"Ollama unavailable"}'); }
+  });
+}).listen(Number(process.env.PORT ?? 8080), '0.0.0.0', function () {
+  if (process.send) process.send({ port: this.address().port });
+});

@@ -52,7 +52,7 @@ export async function chatWithTools(input: {
       tools: input.tools,
       stream: false,
       think: "low",
-      keep_alive: "10m",
+      keep_alive: process.env.OLLAMA_CLOUD_RUN_AUDIENCE ? -1 : "10m",
       options: { temperature: 0 },
     }),
     signal: AbortSignal.timeout(config.ollamaTimeoutMs),

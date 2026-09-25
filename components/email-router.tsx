@@ -27,6 +27,13 @@ export function EmailRouter() {
   }, []);
 
   useEffect(() => {
+    // Opening the page wakes the private GPU service and starts loading the model.
+    void fetch("/api/agent/warmup", { method: "POST" }).catch(() => {
+      // A routing request starts the same warmup if this request fails.
+    });
+  }, []);
+
+  useEffect(() => {
     void fetch("/api/routes")
       .then(async (response) => {
         if (!response.ok) throw new Error("Unable to load forwarding routes.");
