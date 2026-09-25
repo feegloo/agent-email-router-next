@@ -50,5 +50,15 @@ node deploy/cloud-run/manifests.mjs app > "$TMP_DIR/app.json"
 gcloud run services replace "$TMP_DIR/app.json" --region "$REGION" --project "$PROJECT_ID"
 gcloud run services update email-router --no-invoker-iam-check --region "$REGION" --project "$PROJECT_ID"
 APP_URL=$(gcloud run services describe email-router --region "$REGION" --project "$PROJECT_ID" --format 'value(status.url)')
+
+# Cloud Run pulls images from Artifact Registry; local copies are not needed after deployment.
+for item in app gateway ollama; do
+  while IFS= read -r image; do
+    if ! docker image rm "$image" >/dev/null; then
+      echo "Could not remove local image $image (it may be used by a container)." >&2
+    fi
+  done < <(docker image ls "$REGISTRY/$item" --format '{{.Repository}}:{{.Tag}}')
+done
+
 echo "Public UI: $APP_URL"
 echo "The GPU service remains private."
