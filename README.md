@@ -140,6 +140,8 @@ Stop the services:
 docker compose down
 ```
 
+Compose uses the project name `agent-email-router-next` by default, even when the repository is cloned into a different directory. Its four volumes have fixed Docker names (`agent-email-router-next_routes_data`, `agent-email-router-next_ollama_data`, `agent-email-router-next_ollama_logs`, and `agent-email-router-next_mailhog`) and are reused on subsequent starts. The Ollama model initialization container also mounts `ollama_data`, so it does not create a separate anonymous model volume. `docker compose down` retains the named volumes and their data; avoid `down -v` if you want to keep them. Existing volumes created under other names are not deleted automatically. Check the volumes with `docker volume ls --filter name=agent-email-router-next_`.
+
 ### Live container logs
 
 The six small lines below the agent status show raw Ollama stdout/stderr, not model response tokens. Logs are streamed through `/api/agent/logs` using Server-Sent Events (SSE). The UI queues incoming lines and adds one every 100 ms, shifting older lines up and keeping at most six visible. Hover a line to read its full text.
