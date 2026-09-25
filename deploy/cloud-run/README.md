@@ -7,7 +7,7 @@ Two Cloud Run services, both with minimum instances 0:
 
 Qwen 3.5 0.8B is downloaded into the Ollama image during build. Opening the UI sends an authenticated warmup request to load the model into GPU memory after scale-to-zero. A routing request arriving during warmup waits for the same load to complete, then runs normally. Concurrent warmup requests share one in-memory promise per GPU instance. A warm routing latency has not yet been measured in GCP.
 
-Rules live in a private Cloud Storage bucket. Updates use object generation preconditions and retry conflicts, including during overlapping deployments. Local Docker Compose continues using its existing JSON volume.
+Initial routes come from the existing private Cloud Storage bucket. Edits to emails and rules stay in the current page and travel with each message request; they are not written back to the bucket. Reloading restores the stored initial routes. Local Docker Compose still reads its existing JSON volume for the initial routes.
 
 ## Deploy from your computer
 
@@ -28,7 +28,7 @@ After both services deploy successfully, the script removes local images for thi
 
 After deploying, the script enables public access only for `email-router` using `--no-invoker-iam-check` and prints its URL. Open that URL directly in your browser; no local proxy is needed. This works on both initial deployment and redeployment. `email-router-gpu` remains protected by Cloud Run IAM.
 
-The public demo allows any visitor to send messages, edit shared routing rules and view raw logs during routing. There is no per-user isolation; visitor requests can incur GPU costs.
+The public demo allows any visitor to send messages, change routes for their current page and view raw logs during routing. Route edits are not shared between visitors, but the raw log stream is shared. Visitor requests can incur GPU costs.
 
 ## Access through an authenticated local proxy
 
@@ -59,7 +59,7 @@ See [Google's authenticated proxy documentation](https://docs.cloud.google.com/r
 1. Open the UI. Confirm it starts one GPU warmup and that a message sent during warmup waits before invoking the model.
 2. Send a holiday request. Check live raw logs and the selected HR route. Record first-request and warm-request times separately.
 3. Verify the browser closes `/api/agent/logs` on success and on failure. After idle time, both services should reach zero instances.
-4. Confirm edited rules survive a restart/redeployment.
+4. Confirm edited routes disappear after a reload and another visitor does not see them. The initial routes in Cloud Storage remain available after a restart/redeployment.
 5. Test a failed routing request, then retry successfully. There must be no stuck Sending state.
 
 Logs show actual Ollama stdout/stderr, not model answer tokens. The gateway exposes only `/api/chat`, `/api/ps`, `/warmup`, `/logs`, and `/health`; Cloud Run IAM protects the service. The SSE stream also has a finite lifetime in case a browser disconnect is not propagated.
@@ -88,9 +88,9 @@ bash deploy/cloud-run/deploy.sh
 
 The script grants the runtime service account access to this secret and pins its version in the Cloud Run configuration. Keep these settings for redeployments; the script fails before building if required SMTP settings are missing. For password rotation, add a new secret version and deploy with that version number. Other SMTP providers work with the same variables; for port 465 also export `SMTP_SECURE=true`.
 
-Change one route's email address in the UI to your authorized inbox, leaving its routing rule intact, then send a matching message. Check your inbox, spam folder and Mailgun sending logs. The default `example.com` destinations will not deliver real email.
+Change one route's email address in the UI to your authorized inbox, leaving its routing rule intact, then send a matching message. Check your inbox, spam folder and Mailgun sending logs. The edit disappears after reloading the page. The default `example.com` destinations will not deliver real email.
 
-The app sends to any address selected from the saved routes and reports an SMTP rejection as a delivery warning while keeping the selected route highlighted. Mailgun sandbox still restricts delivery to its verified recipients. Use a verified custom sending domain for delivery beyond sandbox recipients.
+The app sends to any address selected from the routes included with the message and reports an SMTP rejection as a delivery warning while keeping the selected route highlighted. Mailgun sandbox still restricts delivery to its verified recipients. Use a verified custom sending domain for delivery beyond sandbox recipients.
 
 References: [Mailgun sandbox](https://documentation.mailgun.com/docs/mailgun/user-manual/domains/domains-sandbox), [Cloud Run secrets](https://docs.cloud.google.com/run/docs/configuring/services/secrets).
 
