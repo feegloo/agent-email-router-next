@@ -263,19 +263,6 @@ textarea:focus {
 
 .delete-route:disabled { opacity: 0.25; cursor: not-allowed; }
 
-.save-status {
-  position: absolute;
-  top: -7px;
-  background: #102033;
-  padding: 0 4px;
-  right: 13px;
-  color: #91a5bd;
-  font-size: 10px;
-}
-
-.save-status.saving { color: #f4c86a; }
-.save-status.error { color: #ff94a5; }
-
 .add-route {
   position: absolute;
   top: -38px;
