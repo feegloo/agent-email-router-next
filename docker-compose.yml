@@ -1,3 +1,5 @@
+name: agent-email-router-next
+
 services:
   app:
     build: .
@@ -45,6 +47,8 @@ services:
 
   ollama-model-init:
     image: ollama/ollama:0.32.2
+    volumes:
+      - ollama_data:/root/.ollama
     environment:
       OLLAMA_HOST: http://ollama:11434
       OLLAMA_MODEL: qwen3.5:0.8b
@@ -74,6 +78,10 @@ services:
 
 volumes:
   routes_data:
+    name: agent-email-router-next_routes_data
   ollama_data:
+    name: agent-email-router-next_ollama_data
   ollama_logs:
+    name: agent-email-router-next_ollama_logs
   mailhog:
+    name: agent-email-router-next_mailhog
