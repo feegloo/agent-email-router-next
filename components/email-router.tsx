@@ -194,7 +194,7 @@ export function EmailRouter() {
             {status === "processing" ? "Sending..." : "Send message"}
           </button>
           {error ? <p className="error-message">{error}</p> : null}
-          {warning ? <p className="warning-message" role="status">The message was forwarded by the agent but couldn&apos;t be emailed.</p> : null}
+          {warning ? <p className="warning-message" role="status">The message was routed by the agent but couldn&apos;t be emailed.</p> : null}
         </form>
 
         <div className={`flow-arrow ${flowStarted ? "active" : ""}`} aria-hidden="true" />
